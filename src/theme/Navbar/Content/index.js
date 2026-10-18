@@ -9,6 +9,7 @@ import {Button, Flex, Menu, Space, Typography} from 'antd';
 import {MenuOutlined} from '@ant-design/icons';
 import NavbarColorModeToggle from '@theme/Navbar/ColorModeToggle';
 import NavbarMobileSidebar from '@theme/Navbar/MobileSidebar';
+import SearchBar from '@theme/SearchBar';
 
 const {Text} = Typography;
 
@@ -103,6 +104,7 @@ export default function NavbarContent() {
           {toMenuItems(rightItems).map((i) => (
             <span key={i.key}>{i.label}</span>
           ))}
+          <SearchBar />
           <NavbarColorModeToggle />
         </Space>
       </Flex>
