@@ -63,6 +63,13 @@ const config = {
                   href: `${context.siteConfig.baseUrl}fonts/fonts.css`,
                 },
               },
+              {
+                tagName: 'link',
+                attributes: {
+                  rel: 'stylesheet',
+                  href: `${context.siteConfig.baseUrl}css/katex.css`,
+                },
+              },
             ],
           };
         },
