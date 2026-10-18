@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 // 如果仓库名是 <user>.github.io（用户/组织主页），把 baseUrl 改成 '/'
 // ============================================================
 const GITHUB_USER = '0409linxiansheng';
-const GITHUB_REPO = 'docs';
+const GITHUB_REPO = 'YYJ-wiki';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -101,7 +101,7 @@ const config = {
             items: [
               {
                 label: '教程',
-                to: '/docs/intro',
+                to: '/intro',
               },
             ],
           },

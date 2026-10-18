@@ -18,3 +18,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# 本地日志
+install.log
+dev.log
+serve.log
