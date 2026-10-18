@@ -40,21 +40,6 @@ module.exports = function kbRoutesPlugin(context) {
         component: '@site/src/components/kb/KbHome.js',
         exact: true,
       });
-
-      // 每个 docs 顶层目录生成一个静态分类页（动态参数路由无法 SSG）
-      const docsDir = path.join(siteDir, 'docs');
-      const dirs = fs
-        .readdirSync(docsDir, {withFileTypes: true})
-        .filter((entry) => entry.isDirectory() && !entry.name.startsWith('_'))
-        .map((entry) => entry.name);
-
-      for (const slug of dirs) {
-        actions.addRoute({
-          path: `${baseUrl}kb/c/${slug}`,
-          component: '@site/src/components/kb/KbCategory.js',
-          exact: true,
-        });
-      }
     },
 
     allContentLoaded({allContent, actions}) {

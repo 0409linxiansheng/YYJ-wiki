@@ -117,11 +117,6 @@ const config = {
           src: 'img/logo.svg',
         },
         items: [
-          {
-            to: '/guide/intro',
-            position: 'left',
-            label: '教程',
-          },
           {to: '/kb', label: '知识库', position: 'left'},
           {to: '/blog', label: '博客', position: 'left'},
           {
@@ -135,10 +130,14 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: '文档',
+            title: '知识库',
             items: [
               {
-                label: '教程',
+                label: '知识库',
+                to: '/kb',
+              },
+              {
+                label: '建站指南',
                 to: '/guide/intro',
               },
             ],

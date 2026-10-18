@@ -565,3 +565,32 @@ body {
 [data-theme='dark'] .theme-admonition {
   background: color-mix(in srgb, var(--card) 60%, transparent);
 }
+
+/* ---------- 知识库首页：主题导航 ---------- */
+.kb-theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kb-theme-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted-fg);
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.kb-theme-item:hover {
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+  color: var(--fg);
+}
+
+.kb-theme-item.active {
+  background: color-mix(in srgb, var(--brand-500) 12%, transparent);
+  color: var(--brand-700);
+  font-weight: 500;
+}

@@ -39,7 +39,7 @@ export default function DocBreadcrumbs() {
   const items = [
     {title: <Link to="/">首页</Link>},
     {title: <Link to="/kb">知识库</Link>},
-    {title: <Link to={`/kb/c/${category.slug}`}>{category.label}</Link>},
+    {title: <Link to={`/kb?c=${category.slug}`}>{category.label}</Link>},
     ...(subLabel ? [{title: subLabel}] : []),
     ...(doc ? [{title: <Text type="secondary">{doc.title}</Text>}] : []),
   ];
