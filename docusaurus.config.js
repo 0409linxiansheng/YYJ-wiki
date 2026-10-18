@@ -38,6 +38,7 @@ const config = {
   },
 
   plugins: [
+    './plugins/kb-routes',
     function fontLinksPlugin(context) {
       return {
         name: 'font-links',
@@ -80,6 +81,8 @@ const config = {
         docs: {
           sidebarPath: './sidebars.js',
           routeBasePath: '/',
+          showLastUpdateTime: true,
+          showLastUpdateAuthor: false,
           editUrl: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/tree/main/`,
         },
         blog: {
@@ -115,10 +118,11 @@ const config = {
         },
         items: [
           {
-            to: '/intro',
+            to: '/guide/intro',
             position: 'left',
             label: '教程',
           },
+          {to: '/kb', label: '知识库', position: 'left'},
           {to: '/blog', label: '博客', position: 'left'},
           {
             href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
@@ -135,7 +139,7 @@ const config = {
             items: [
               {
                 label: '教程',
-                to: '/intro',
+                to: '/guide/intro',
               },
             ],
           },

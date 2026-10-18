@@ -19,21 +19,21 @@ const ENTRIES = [
     icon: <RocketOutlined />,
     title: '快速开始',
     desc: '从零跑起来：安装依赖、启动开发服务器、理解目录结构。',
-    to: '/intro',
+    to: '/guide/intro',
   },
   {
     no: '02',
     icon: <BookOutlined />,
     title: '核心概念',
     desc: '文档、侧边栏、版本与多语言，以及它们如何组织成站点。',
-    to: '/tutorial-basics/create-a-document',
+    to: '/guide/tutorial-basics/create-a-document',
   },
   {
     no: '03',
     icon: <CodeOutlined />,
     title: '定制与部署',
     desc: '主题定制、组件替换，以及推送到 GitHub Pages 的完整链路。',
-    to: '/tutorial-basics/deploy-your-site',
+    to: '/guide/tutorial-basics/deploy-your-site',
   },
 ];
 
@@ -132,7 +132,7 @@ export default function Home() {
             <Button
               type="primary"
               size="large"
-              onClick={() => history.push('/intro')}>
+              onClick={() => history.push('/guide/intro')}>
               开始阅读 <ArrowRightOutlined />
             </Button>
             <Button size="large" onClick={() => history.push('/blog')}>
