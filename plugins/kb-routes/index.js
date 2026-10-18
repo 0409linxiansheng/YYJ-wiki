@@ -144,6 +144,33 @@ module.exports = function kbRoutesPlugin(context) {
       };
 
       actions.createData('kb-index.json', JSON.stringify(index));
+
+      // ---- 博客索引 ----
+      const blogData = allContent['docusaurus-plugin-content-blog']?.default;
+      const rawPosts = blogData?.blogPosts ?? [];
+      const postList = Array.isArray(rawPosts) ? rawPosts : Object.values(rawPosts);
+      const posts = postList.map((entry) => {
+        const m = entry.metadata ?? entry;
+        return {
+          title: m.title,
+          permalink: m.permalink,
+          description: m.description ?? '',
+          date: m.date,
+          tags: (m.tags ?? []).map((t) => (typeof t === 'string' ? t : t.label)),
+          featured: Boolean(m.frontMatter?.featured),
+          readingTime: m.readingTime ?? null,
+        };
+      }).sort((a, b) => (a.date < b.date ? 1 : -1));
+
+      actions.createData(
+        'blog-index.json',
+        JSON.stringify({
+          posts,
+          featured: posts.find((p) => p.featured) ?? null,
+          tags: [...new Set(posts.flatMap((p) => p.tags))],
+          debugKeys: Object.keys(blogData ?? {}),
+        }),
+      );
     },
   };
 };
