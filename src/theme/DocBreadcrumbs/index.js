@@ -41,7 +41,7 @@ export default function DocBreadcrumbs() {
     {title: <Link to="/kb">知识库</Link>},
     {title: <Link to={`/kb?c=${category.slug}`}>{category.label}</Link>},
     ...(subLabel ? [{title: subLabel}] : []),
-    ...(doc ? [{title: <Text type="secondary">{doc.title}</Text>}] : []),
+    ...(doc ? [{title: <Text style={{fontWeight: 600}}>{doc.title}</Text>}] : []),
   ];
 
   return <Breadcrumb items={items} separator="›" style={{marginBottom: 20, fontSize: 13}} />;

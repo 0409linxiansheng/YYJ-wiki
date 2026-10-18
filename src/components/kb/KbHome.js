@@ -4,7 +4,7 @@ import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {useLocation} from '@docusaurus/router';
 import {
-  AppstoreOutlined,
+  ArrowLeftOutlined,
   CalendarOutlined,
   CloudServerOutlined,
   DatabaseOutlined,
@@ -14,7 +14,7 @@ import {
   ReadOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import {Breadcrumb, Button, Col, Empty, Flex, Input, Row, Tag, Typography} from 'antd';
+import {Breadcrumb, Button, Empty, Flex, Input, Tag, Typography} from 'antd';
 import kbIndex from '@generated/kb-routes/default/kb-index.json';
 import {formatDate, stripBaseUrl} from '@site/src/utils/ui';
 
@@ -35,57 +35,27 @@ export default function KbHome() {
   const {categories, recent} = kbIndex;
 
   const initialSlug = useMemo(() => new URLSearchParams(search).get('c'), [search]);
-  const [view, setView] = useState({type: 'recent'});
-  const [filter, setFilter] = useState('');
+  const [activeSlug, setActiveSlug] = useState(initialSlug);
 
-  // 读取 ?c=<slug> 深链（SSR 阶段拿不到 query，需在 mount 后同步）
   useEffect(() => {
     if (initialSlug) {
-      setView({type: 'theme', slug: initialSlug});
+      setActiveSlug(initialSlug);
     }
   }, [initialSlug]);
 
-  const allDocs = useMemo(
-    () =>
-      categories.flatMap((c) =>
-        c.docs.map((d) => ({...d, category: c.slug, categoryLabel: c.label})),
-      ),
-    [categories],
-  );
+  const activeCategory = activeSlug
+    ? categories.find((c) => c.slug === activeSlug)
+    : null;
 
-  const filteredCategories = useMemo(
-    () =>
-      categories.filter((c) =>
-        c.label.toLowerCase().includes(filter.trim().toLowerCase()),
-      ),
-    [categories, filter],
-  );
-
-  // 计算右侧展示内容
-  let displayTitle = '最近更新';
-  let displayDocs = recent.map((r) => ({
-    ...r,
-    categoryLabel: categories.find((c) => c.slug === r.category)?.label ?? r.category,
-  }));
-
-  if (view.type === 'all') {
-    displayTitle = '全部内容';
-    displayDocs = allDocs;
-  } else if (view.type === 'theme') {
-    const c = categories.find((x) => x.slug === view.slug);
-    if (c) {
-      displayTitle = c.label;
-      displayDocs = c.docs;
-    }
-  }
+  const recentTen = recent.slice(0, 10);
 
   return (
     <Layout title="知识库" description="按主题组织的技术知识库">
-      {/* Hero 居中 */}
+      {/* Header 居中 */}
       <section
         style={{
           textAlign: 'center',
-          padding: '64px 24px 40px',
+          padding: '56px 24px 36px',
           borderBottom: '1px solid var(--line)',
           background:
             'radial-gradient(900px 300px at 50% -20%, rgba(37,99,235,0.10), transparent 70%)',
@@ -120,112 +90,114 @@ export default function KbHome() {
         </div>
       </section>
 
-      {/* 两栏内容区 */}
-      <section style={{maxWidth: 1200, margin: '0 auto', padding: '40px 24px 96px'}}>
-        <Row gutter={[40, 32]}>
-          {/* 左：全部主题 + 筛选 + 全部内容 */}
-          <Col xs={24} md={7}>
-            <div style={{position: 'sticky', top: 88}}>
-              <Flex justify="space-between" align="center" style={{marginBottom: 12}}>
-                <Text strong style={{fontSize: 15}}>
-                  全部主题
-                </Text>
-                <Text type="secondary" style={{fontSize: 12}}>
-                  {categories.length} 个主题
-                </Text>
-              </Flex>
-
-              <Flex gap={8} style={{marginBottom: 12}}>
-                <Input
-                  allowClear
-                  prefix={<SearchOutlined style={{color: 'var(--muted-fg)'}} />}
-                  placeholder="筛选主题…"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  style={{flex: 1}}
-                />
-                <Button
-                  type={view.type === 'all' ? 'primary' : 'default'}
-                  onClick={() => setView({type: 'all'})}>
-                  <AppstoreOutlined /> 全部内容
-                </Button>
-              </Flex>
-
+      {!activeCategory ? (
+        /* 首页：左 70% 主题，右 30% 最近更新 */
+        <section style={{maxWidth: 1200, margin: '0 auto', padding: '40px 24px 96px'}}>
+          <div className="kb-home-cols">
+            <div className="kb-themes-col">
+              <Title level={2} style={{fontSize: 20, marginBottom: 16}}>
+                全部主题
+              </Title>
               <div className="kb-theme-list">
-                {filteredCategories.map((c) => {
-                  const active = view.type === 'theme' && view.slug === c.slug;
-                  return (
-                    <div
-                      key={c.slug}
-                      className={'kb-theme-item' + (active ? ' active' : '')}
-                      onClick={() => setView({type: 'theme', slug: c.slug})}>
-                      <Text style={{fontSize: 16, color: 'var(--brand-700)'}}>
-                        {ICONS[c.icon] ?? ICONS.folder}
-                      </Text>
-                      <Text style={{flex: 1, color: 'inherit'}}>{c.label}</Text>
-                      <Tag bordered={false}>{c.count}</Tag>
-                    </div>
-                  );
-                })}
-                {filteredCategories.length === 0 && (
-                  <Text type="secondary" style={{fontSize: 13}}>
-                    没有匹配的主题
-                  </Text>
-                )}
+                {categories.map((c) => (
+                  <div
+                    key={c.slug}
+                    className="kb-theme-item"
+                    onClick={() => setActiveSlug(c.slug)}>
+                    <Text style={{fontSize: 16, color: 'var(--brand-700)'}}>
+                      {ICONS[c.icon] ?? ICONS.folder}
+                    </Text>
+                    <Text style={{flex: 1, color: 'inherit'}}>{c.label}</Text>
+                    <Tag bordered={false}>{c.count}</Tag>
+                  </div>
+                ))}
               </div>
             </div>
-          </Col>
 
-          {/* 右：内容区 */}
-          <Col xs={24} md={17}>
-            <Flex justify="space-between" align="baseline" style={{marginBottom: 16}}>
-              <Title level={2} style={{margin: 0, fontSize: 22}}>
-                {displayTitle}
+            <div className="kb-recent-col">
+              <Title level={2} style={{fontSize: 20, marginBottom: 16}}>
+                最近更新
               </Title>
-              <Text type="secondary" style={{fontSize: 13}}>
-                {displayDocs.length} 篇
-              </Text>
-            </Flex>
-
-            {displayDocs.length === 0 ? (
-              <Empty description="暂无内容" />
-            ) : (
-              <Flex vertical gap={0}>
-                {displayDocs.map((doc) => (
-                  <Link
-                    key={doc.permalink}
-                    to={stripBaseUrl(doc.permalink, baseUrl)}
-                    style={{display: 'block', padding: '14px 0', borderBottom: '1px solid var(--line)'}}>
-                    <Flex justify="space-between" align="center" gap={16}>
-                      <Flex vertical gap={4} style={{minWidth: 0}}>
-                        <Flex align="center" gap={8}>
-                          <FileTextOutlined style={{color: 'var(--muted-fg)'}} />
-                          <Text strong>{doc.title}</Text>
-                        </Flex>
-                        {doc.description && (
-                          <Text type="secondary" style={{fontSize: 13}}>
-                            {doc.description}
-                          </Text>
-                        )}
-                      </Flex>
-                      <Flex vertical gap={2} align="flex-end" style={{flexShrink: 0}}>
-                        {doc.categoryLabel && (
-                          <Text type="secondary" style={{fontSize: 12}}>
-                            {doc.categoryLabel}
-                          </Text>
-                        )}
-                        <Text type="secondary" style={{fontSize: 12, whiteSpace: 'nowrap'}}>
+              {recentTen.length === 0 ? (
+                <Empty description="暂无更新" />
+              ) : (
+                <Flex vertical gap={0}>
+                  {recentTen.map((doc) => (
+                    <Link
+                      key={doc.permalink}
+                      to={stripBaseUrl(doc.permalink, baseUrl)}
+                      style={{display: 'block', padding: '12px 0', borderBottom: '1px solid var(--line)'}}>
+                      <Flex vertical gap={4}>
+                        <Text strong style={{lineHeight: 1.5}}>
+                          {doc.title}
+                        </Text>
+                        <Text type="secondary" style={{fontSize: 12}}>
                           <CalendarOutlined /> {formatDate(doc.updatedAt)}
                         </Text>
                       </Flex>
+                    </Link>
+                  ))}
+                </Flex>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : (
+        /* 主题视图：只显示该主题文档 */
+        <section style={{maxWidth: 1000, margin: '0 auto', padding: '40px 24px 96px'}}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => setActiveSlug(null)}
+            style={{paddingLeft: 0, marginBottom: 8}}>
+            返回全部主题
+          </Button>
+
+          <Breadcrumb
+            items={[
+              {title: <Link to="/">首页</Link>},
+              {title: <Link to="/kb">知识库</Link>},
+              {title: activeCategory.label},
+            ]}
+          />
+
+          <Title level={1} style={{margin: '16px 0 8px', fontSize: 32}}>
+            {activeCategory.label}
+          </Title>
+          <Paragraph style={{color: 'var(--muted-fg)', fontSize: 16, marginBottom: 8}}>
+            {activeCategory.desc}
+          </Paragraph>
+          <Text type="secondary" style={{fontSize: 13}}>
+            共 {activeCategory.count} 篇
+          </Text>
+
+          <Flex vertical gap={0} style={{marginTop: 24}}>
+            {activeCategory.docs.map((doc) => (
+              <Link
+                key={doc.permalink}
+                to={stripBaseUrl(doc.permalink, baseUrl)}
+                style={{display: 'block', padding: '16px 0', borderBottom: '1px solid var(--line)'}}>
+                <Flex justify="space-between" align="center" gap={16}>
+                  <Flex vertical gap={4} style={{minWidth: 0}}>
+                    <Flex align="center" gap={8}>
+                      <FileTextOutlined style={{color: 'var(--muted-fg)'}} />
+                      <Text strong>{doc.title}</Text>
                     </Flex>
-                  </Link>
-                ))}
-              </Flex>
-            )}
-          </Col>
-        </Row>
-      </section>
+                    {doc.description && (
+                      <Text type="secondary" style={{fontSize: 13}}>
+                        {doc.description}
+                      </Text>
+                    )}
+                  </Flex>
+                  <Text type="secondary" style={{fontSize: 12, whiteSpace: 'nowrap'}}>
+                    <CalendarOutlined /> {formatDate(doc.updatedAt)}
+                  </Text>
+                </Flex>
+              </Link>
+            ))}
+          </Flex>
+        </section>
+      )}
     </Layout>
   );
 }

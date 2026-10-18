@@ -506,6 +506,9 @@ body {
   border: 1px solid var(--line);
   border-radius: 10px;
   box-shadow: none;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  min-height: 48px;
 }
 
 .markdown pre code {
@@ -600,4 +603,29 @@ body {
 /* ---------- 修复：flex 容器里 max-width 区块被收缩 ---------- */
 .main-wrapper > section {
   width: 100%;
+}
+
+
+/* ---------- 知识库首页：70/30 两栏 ---------- */
+.kb-home-cols {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.kb-themes-col {
+  flex: 7;
+  min-width: 0;
+}
+
+.kb-recent-col {
+  flex: 3;
+  min-width: 0;
+}
+
+@media (max-width: 996px) {
+  .kb-home-cols {
+    flex-direction: column;
+    gap: 32px;
+  }
 }
