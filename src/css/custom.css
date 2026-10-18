@@ -688,3 +688,17 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- 代码 diff 增删行配色 ---------- */
+.markdown .token.deleted {
+  color: #ef4444;
+}
+.markdown .token.inserted {
+  color: #16a34a;
+}
+[data-theme='dark'] .markdown .token.deleted {
+  color: #f87171;
+}
+[data-theme='dark'] .markdown .token.inserted {
+  color: #4ade80;
+}

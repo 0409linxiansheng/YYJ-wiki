@@ -1,6 +1,9 @@
 // @ts-check
 // 本文件在 Node 里执行，不要写浏览器端代码（DOM/JSX）。
 import {themes as prismThemes} from 'prism-react-renderer';
+import math from 'remark-math';
+import katex from 'rehype-katex';
+import footnotes from 'remark-footnotes';
 
 // ============================================================
 // 只需要改下面这两行，其余配置会自动跟着对齐
@@ -17,6 +20,10 @@ const config = {
   title: '我的文档站',
   tagline: 'Docusaurus 构建 · GitHub Pages 托管',
   favicon: 'img/favicon.ico',
+
+  markdown: {
+    mermaid: true,
+  },
 
   future: {
     v4: true,
@@ -38,6 +45,10 @@ const config = {
   },
 
   plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {redirects: []},
+    ],
     './plugins/kb-routes',
     function fontLinksPlugin(context) {
       return {
@@ -60,6 +71,7 @@ const config = {
   ],
 
   themes: [
+    '@docusaurus/theme-mermaid',
     [
       '@easyops-cn/docusaurus-search-local',
       {
@@ -80,6 +92,8 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          remarkPlugins: [math, footnotes],
+          rehypePlugins: [katex],
           routeBasePath: '/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: false,
@@ -87,6 +101,8 @@ const config = {
         },
         blog: {
           showReadingTime: true,
+          remarkPlugins: [math, footnotes],
+          rehypePlugins: [katex],
           feedOptions: {
             type: ['rss', 'atom'],
             xslt: true,
@@ -172,6 +188,7 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} 我的文档站 · Built with Docusaurus.`,
       },
       prism: {
+        additionalLanguages: ['diff'],
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
       },

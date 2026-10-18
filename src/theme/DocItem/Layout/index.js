@@ -10,6 +10,7 @@ import DocItemTOCMobile from '@theme/DocItem/TOC/Mobile';
 import DocItemTOCDesktop from '@theme/DocItem/TOC/Desktop';
 import DocItemContent from '@theme/DocItem/Content';
 import DocBreadcrumbs from '@theme/DocBreadcrumbs';
+import Giscus from '@site/src/components/ui/Giscus';
 import ContentVisibility from '@theme/ContentVisibility';
 
 
@@ -44,6 +45,7 @@ export default function DocItemLayout({children}) {
           <DocItemFooter />
         </article>
         <DocItemPaginator />
+        <Giscus />
       </div>
       {docTOC.desktop && <div className="doc-item-toc">{docTOC.desktop}</div>}
     </div>

@@ -160,3 +160,46 @@ yarn install
 
   </TabItem>
 </Tabs>
+
+## 十二、Mermaid 图
+
+```mermaid
+graph TD
+    A[开始] --> B{是否部署?}
+    B -->|是| C[推送到 GitHub]
+    C --> D[Actions 自动构建]
+    B -->|否| E[继续本地开发]
+```
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+    participant 用户
+    participant 站点
+    用户->>站点: 访问页面
+    站点-->>用户: 返回 HTML
+```
+
+## 十三、数学公式（KaTeX）
+
+行内公式：质能方程 $E = mc^2$。
+
+块级公式：
+
+$$
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+$$
+
+## 十四、代码 Diff
+
+```diff
+- const oldValue = 1;
++ const newValue = 2;
+```
+
+## 十五、脚注
+
+这里引用了一个脚注[^1]。
+
+[^1]: 这是脚注的内容，会显示在文末。
