@@ -393,3 +393,54 @@ body {
     display: block;
   }
 }
+
+/* ---------- 博客正文页 ---------- */
+.blog-post-page article {
+  max-width: var(--blog-content-max);
+}
+
+.blog-post-page .markdown {
+  max-width: var(--blog-content-max);
+}
+
+.blog-post-page article header h1 {
+  font-size: 34px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+.blog-post-page article header .margin-vert--md {
+  color: var(--muted-fg);
+  font-size: 14px;
+}
+
+/* 移动端：正文内嵌的「本页目录」折叠块 */
+.theme-doc-toc-mobile,
+.blog-post-page .theme-doc-toc-mobile {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 8px 14px;
+  margin-bottom: 24px;
+}
+
+.theme-doc-toc-mobile button {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* 移动端：表格横向滚动，代码块保留滚动 */
+@media (max-width: 996px) {
+  .markdown table {
+    display: block;
+    overflow-x: auto;
+  }
+  .markdown pre {
+    max-width: calc(100vw - 48px);
+  }
+  .doc-item-layout,
+  .blog-post-page article {
+    max-width: 100%;
+  }
+}
