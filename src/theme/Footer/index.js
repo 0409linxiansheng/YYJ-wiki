@@ -2,24 +2,27 @@ import React from 'react';
 import Link from '@docusaurus/Link';
 import {useThemeConfig} from '@docusaurus/theme-common';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import {Divider, Flex, Layout, Space, Typography} from 'antd';
+import {Divider, Flex, Layout, Space, Typography, theme} from 'antd';
 
 const {Text, Link: AntLink} = Typography;
 
 export default function Footer() {
   const {footer} = useThemeConfig();
   const {siteConfig} = useDocusaurusContext();
+  const {token} = theme.useToken();
+
   if (!footer) {
     return null;
   }
-  const {links = [], copyright, style} = footer;
+  const {links = [], copyright} = footer;
 
   return (
     <Layout.Footer
+      className="site-footer"
       style={{
         marginTop: 64,
         padding: '40px 24px 28px',
-        background: style === 'dark' ? '#0f0f0f' : undefined,
+        color: token.colorText,
       }}>
       <div style={{maxWidth: 1200, margin: '0 auto'}}>
         <Flex wrap justify="space-between" gap={32}>
