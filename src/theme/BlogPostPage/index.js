@@ -1,4 +1,5 @@
 import React from 'react';
+import {formatDate, stripBaseUrl} from '@site/src/utils/ui';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -19,18 +20,10 @@ import blogIndex from '@generated/kb-routes/default/blog-index.json';
 
 const {Title, Text} = Typography;
 
-function formatDate(value) {
-  return new Date(value).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
 
 function RelatedArticles() {
   const {siteConfig} = useDocusaurusContext();
   const baseUrl = siteConfig.baseUrl;
-  const strip = (url) => (url?.startsWith(baseUrl) ? `/${url.slice(baseUrl.length)}` : url);
   const {metadata} = useBlogPost();
   const currentTags = new Set((metadata.tags ?? []).map((t) => (typeof t === 'string' ? t : t.label)));
   const related = blogIndex.posts
@@ -54,7 +47,7 @@ function RelatedArticles() {
       <Row gutter={[20, 20]}>
         {related.map((post) => (
           <Col xs={24} md={8} key={post.permalink}>
-            <Link to={strip(post.permalink)} style={{display: 'block', height: '100%'}}>
+            <Link to={stripBaseUrl(post.permalink, baseUrl)} style={{display: 'block', height: '100%'}}>
               <Card hoverable size="small" style={{height: '100%', borderRadius: 10}}>
                 <Text strong style={{display: 'block', lineHeight: 1.4}}>
                   {post.title}

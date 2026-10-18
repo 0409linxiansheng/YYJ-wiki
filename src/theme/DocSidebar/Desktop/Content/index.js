@@ -1,14 +1,9 @@
 import React, {useMemo} from 'react';
+import {stripBaseUrl} from '@site/src/utils/ui';
 import {Menu} from 'antd';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
-function stripBaseUrl(href, baseUrl) {
-  if (!href) {
-    return href;
-  }
-  return href.startsWith(baseUrl) ? `/${href.slice(baseUrl.length)}` : href;
-}
 
 function buildItems(items, baseUrl) {
   return items

@@ -1,4 +1,5 @@
 import React, {useMemo, useState} from 'react';
+import {formatDate, stripBaseUrl} from '@site/src/utils/ui';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
@@ -13,17 +14,10 @@ import kbIndex from '@generated/kb-routes/default/kb-index.json';
 
 const {Title, Paragraph, Text} = Typography;
 
-function formatDate(value) {
-  if (!value) {
-    return '';
-  }
-  return new Date(value).toLocaleDateString('zh-CN');
-}
 
 export default function KbCategory() {
   const {siteConfig} = useDocusaurusContext();
   const baseUrl = siteConfig.baseUrl;
-  const strip = (url) => (url?.startsWith(baseUrl) ? `/${url.slice(baseUrl.length)}` : url);
   const {pathname} = useLocation();
   const slug = pathname.replace(/\/$/, '').split('/').pop();
   const [activeSub, setActiveSub] = useState(null);
@@ -109,7 +103,7 @@ export default function KbCategory() {
             dataSource={docs}
             renderItem={(doc) => (
               <List.Item style={{padding: 0, border: 'none', marginBottom: 12}}>
-                <Link to={strip(doc.permalink)} style={{display: 'block', width: '100%'}}>
+                <Link to={stripBaseUrl(doc.permalink, baseUrl)} style={{display: 'block', width: '100%'}}>
                   <Card
                     hoverable
                     style={{borderRadius: 10}}

@@ -5,21 +5,15 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {Button, Card, Col, Empty, Flex, Row, Tag, Typography} from 'antd';
 import {ArrowLeftOutlined, ArrowRightOutlined, CalendarOutlined} from '@ant-design/icons';
 import blogIndex from '@generated/kb-routes/default/blog-index.json';
+import ArticleCard from '@site/src/components/ui/ArticleCard';
+import SectionHeading from '@site/src/components/ui/SectionHeading';
+import {formatDate, stripBaseUrl} from '@site/src/utils/ui';
 
 const {Title, Paragraph, Text} = Typography;
-
-function formatDate(value) {
-  return new Date(value).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
 
 export default function BlogListPage({metadata}) {
   const {siteConfig} = useDocusaurusContext();
   const baseUrl = siteConfig.baseUrl;
-  const strip = (url) => (url?.startsWith(baseUrl) ? `/${url.slice(baseUrl.length)}` : url);
 
   const {posts, featured} = blogIndex;
   const page = metadata.page ?? 1;
@@ -68,18 +62,13 @@ export default function BlogListPage({metadata}) {
 
       <section style={{maxWidth: 1120, margin: '0 auto', padding: '48px 24px 96px'}}>
         {showFeatured && (
-          <Link to={strip(featured.permalink)} style={{display: 'block', marginBottom: 40}}>
-            <Card
-              hoverable
-              style={{borderRadius: 14, overflow: 'hidden'}}
-              styles={{body: {padding: 0}}}>
+          <Link to={stripBaseUrl(featured.permalink, baseUrl)} style={{display: 'block', marginBottom: 40}}>
+            <Card hoverable style={{borderRadius: 14, overflow: 'hidden'}} styles={{body: {padding: 0}}}>
               <Row>
                 <Col xs={24} md={15}>
                   <div style={{padding: '36px 32px'}}>
                     <Flex gap={8} align="center" style={{marginBottom: 14}}>
-                      <Tag color="blue" bordered={false}>
-                        精选
-                      </Tag>
+                      <Tag color="blue" bordered={false}>精选</Tag>
                       <Text type="secondary" style={{fontSize: 13}}>
                         <CalendarOutlined /> {formatDate(featured.date)}
                       </Text>
@@ -118,14 +107,14 @@ export default function BlogListPage({metadata}) {
           </Link>
         )}
 
-        <Flex justify="space-between" align="baseline" style={{marginBottom: 20}}>
-          <Title level={2} style={{margin: 0, fontSize: 22}}>
-            最新文章
-          </Title>
-          <Text type="secondary" style={{fontSize: 13}}>
-            第 {page} / {metadata.totalPages ?? 1} 页
-          </Text>
-        </Flex>
+        <SectionHeading
+          title="最新文章"
+          extra={
+            <Text type="secondary" style={{fontSize: 13}}>
+              第 {page} / {metadata.totalPages ?? 1} 页
+            </Text>
+          }
+        />
 
         {gridPosts.length === 0 ? (
           <Empty description="暂无文章" />
@@ -133,34 +122,14 @@ export default function BlogListPage({metadata}) {
           <Row gutter={[24, 24]}>
             {gridPosts.map((post) => (
               <Col xs={24} md={12} key={post.permalink}>
-                <Link to={strip(post.permalink)} style={{display: 'block', height: '100%'}}>
-                  <Card
-                    hoverable
-                    style={{height: '100%', borderRadius: 12}}
-                    styles={{body: {padding: 24}}}>
-                    <Flex vertical gap={10}>
-                      <Flex gap={8} wrap>
-                        {post.tags.slice(0, 2).map((tag) => (
-                          <Tag key={tag} bordered={false} color="blue">
-                            {tag}
-                          </Tag>
-                        ))}
-                      </Flex>
-                      <Text strong style={{fontSize: 17, lineHeight: 1.4}}>
-                        {post.title}
-                      </Text>
-                      <Text type="secondary" style={{fontSize: 14, lineHeight: 1.7}}>
-                        {post.description}
-                      </Text>
-                      <Text type="secondary" style={{fontSize: 12}}>
-                        <CalendarOutlined /> {formatDate(post.date)}
-                        {post.readingTime
-                          ? ` · 约 ${Math.max(1, Math.round(post.readingTime))} 分钟`
-                          : ''}
-                      </Text>
-                    </Flex>
-                  </Card>
-                </Link>
+                <ArticleCard
+                  to={stripBaseUrl(post.permalink, baseUrl)}
+                  title={post.title}
+                  description={post.description}
+                  date={post.date}
+                  tags={post.tags}
+                  readingTime={post.readingTime}
+                />
               </Col>
             ))}
           </Row>
@@ -168,12 +137,12 @@ export default function BlogListPage({metadata}) {
 
         <Flex justify="center" gap={12} style={{marginTop: 40}}>
           {metadata.previousPage && (
-            <Link to={strip(metadata.previousPage)}>
+            <Link to={stripBaseUrl(metadata.previousPage, baseUrl)}>
               <Button icon={<ArrowLeftOutlined />}>上一页</Button>
             </Link>
           )}
           {metadata.nextPage && (
-            <Link to={strip(metadata.nextPage)}>
+            <Link to={stripBaseUrl(metadata.nextPage, baseUrl)}>
               <Button>下一页 <ArrowRightOutlined /></Button>
             </Link>
           )}
