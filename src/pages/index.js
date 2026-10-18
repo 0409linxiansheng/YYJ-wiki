@@ -103,7 +103,12 @@ export default function Home() {
               size="large"
               readOnly
               onClick={openSearch}
-              onFocus={openSearch}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openSearch();
+                }
+              }}
               prefix={<SearchOutlined style={{color: 'var(--muted-fg)'}} />}
               suffix={
                 <Text
