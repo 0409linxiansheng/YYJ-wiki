@@ -37,6 +37,27 @@ const config = {
     locales: ['zh-Hans'],
   },
 
+  plugins: [
+    function fontLinksPlugin(context) {
+      return {
+        name: 'font-links',
+        injectHtmlTags() {
+          return {
+            headTags: [
+              {
+                tagName: 'link',
+                attributes: {
+                  rel: 'stylesheet',
+                  href: `${context.siteConfig.baseUrl}fonts/fonts.css`,
+                },
+              },
+            ],
+          };
+        },
+      };
+    },
+  ],
+
   themes: [
     [
       '@easyops-cn/docusaurus-search-local',

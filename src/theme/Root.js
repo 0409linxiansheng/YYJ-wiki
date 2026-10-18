@@ -26,10 +26,14 @@ export default function Root({children}) {
         algorithm:
           mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
-          colorPrimary: '#1677ff',
+          colorPrimary: '#1e40af',
+          colorInfo: '#1e40af',
+          colorLink: '#1e40af',
           borderRadius: 8,
+          fontSize: 15,
           fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif",
+            "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+          fontFamilyCode: "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace",
         },
       }}>
       <AntApp>{children}</AntApp>

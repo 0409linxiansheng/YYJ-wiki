@@ -60,6 +60,12 @@ export default function SearchBar() {
   };
 
   useEffect(() => {
+    const openSearch = () => setOpen(true);
+    window.addEventListener('yyj:open-search', openSearch);
+    return () => window.removeEventListener('yyj:open-search', openSearch);
+  }, []);
+
+  useEffect(() => {
     const onKey = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();

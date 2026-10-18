@@ -1,38 +1,99 @@
-/**
- * 主题：Ant Design。Infima 只保留必要的排版基线，
- * 颜色/圆角/间距统一走 antd token 的语义值。
- */
+/* =========================================================
+   设计系统：Swiss Modernism 2.0 + 「知识蓝」
+   来源：ui-ux-pro-max（FAQ/Documentation Landing 模式）
+   字体：IBM Plex Sans / JetBrains Mono（自托管，CJK 回退系统字）
+   ========================================================= */
 
+/* 字体 @font-face 见 static/fonts/fonts.css（通过 font-links 插件注入） */
+
+/* ---------- 语义色 token ---------- */
 :root {
+  --brand-900: #1e3a8a;
+  --brand-700: #1e40af;
+  --brand-500: #3b82f6;
+  --brand-50: #eff6ff;
+
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --fg: #0f172a;
+  --muted-fg: #475569;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+
+  --site-footer-bg: #f1f5f9;
+
   --ifm-navbar-height: 64px;
-  --ifm-color-primary: #1677ff;
-  --ifm-color-primary-dark: #0958d9;
-  --ifm-color-primary-darker: #0040b0;
-  --ifm-color-primary-darkest: #002c8c;
-  --ifm-color-primary-light: #4096ff;
-  --ifm-color-primary-lighter: #69b1ff;
-  --ifm-color-primary-lightest: #91caff;
-  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --ifm-color-primary: #1e40af;
+  --ifm-color-primary-dark: #1a3a9e;
+  --ifm-color-primary-darker: #17358f;
+  --ifm-color-primary-darkest: #123066;
+  --ifm-color-primary-light: #2b4fc4;
+  --ifm-color-primary-lighter: #3b5fd0;
+  --ifm-color-primary-lightest: #5b7ada;
+  --ifm-font-family-base: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', ui-monospace, SFMono-Regular,
+    Menlo, Consolas, monospace;
   --ifm-heading-font-weight: 600;
-  --ifm-code-font-size: 90%;
-  --ifm-background-surface-color: #ffffff;
-  --ant-color-border: #f0f0f0;
+  --ifm-code-font-size: 87.5%;
+  --ifm-background-color: var(--bg);
+  --ifm-background-surface-color: var(--card);
+  --ant-color-border: var(--line);
 }
 
 [data-theme='dark'] {
-  --ifm-background-surface-color: #141414;
-  --ifm-background-color: #000000;
-  --ant-color-border: #303030;
+  --bg: #0b1120;
+  --card: #111827;
+  --fg: #e5e7eb;
+  --muted-fg: #94a3b8;
+  --line: #1f2937;
+  --line-strong: #334155;
+
+  --site-footer-bg: #0f172a;
+
+  --ifm-background-color: var(--bg);
+  --ifm-background-surface-color: var(--card);
+  --ant-color-border: var(--line);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-padding-top: calc(var(--ifm-navbar-height) + 16px);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ---------- 无障碍：焦点环 / 减少动效 ---------- */
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ---------- 导航栏 ---------- */
 .navbar {
   height: var(--ifm-navbar-height);
   padding: 0 24px;
-  background: color-mix(in srgb, var(--ifm-background-surface-color) 88%, transparent);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: saturate(180%) blur(12px);
-  border-bottom: 1px solid var(--ant-color-border);
+  border-bottom: 1px solid var(--line);
   box-shadow: none;
 }
 
@@ -40,7 +101,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
   height: 100%;
 }
@@ -48,8 +109,8 @@
 .antd-navbar-brand {
   text-decoration: none;
   color: inherit;
+  border-radius: 8px;
 }
-
 .antd-navbar-brand:hover {
   text-decoration: none;
   color: inherit;
@@ -59,9 +120,9 @@
   flex: 0 1 auto;
   min-width: 0;
 }
-
 .antd-navbar-menu .ant-menu-horizontal {
   line-height: var(--ifm-navbar-height);
+  font-size: 14px;
 }
 
 .antd-navbar-burger {
@@ -77,54 +138,95 @@
   }
 }
 
-/* ---------- 文档正文排版 ---------- */
+/* 触控目标不小于 44px */
+@media (max-width: 996px) {
+  .antd-navbar-inner .ant-btn,
+  .antd-navbar-inner .ant-segmented-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ---------- 文档正文 ---------- */
 .markdown {
   font-size: 15px;
   line-height: 1.75;
+  color: var(--fg);
 }
 
-.markdown h1 {
-  font-size: 30px;
-  font-weight: 600;
+.markdown > h1 {
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
   margin-bottom: 20px;
 }
 
 .markdown h2 {
-  font-size: 22px;
-  font-weight: 600;
-  margin-top: 40px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--ant-color-border);
+  font-size: 23px;
+  line-height: 1.35;
+  margin-top: 44px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
 }
 
 .markdown h3 {
   font-size: 18px;
-  font-weight: 600;
-  margin-top: 28px;
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+.markdown h4 {
+  font-size: 16px;
+  margin-top: 24px;
+}
+
+.markdown p,
+.markdown li {
+  color: var(--fg);
 }
 
 .markdown a {
-  color: var(--ifm-color-primary);
+  color: var(--brand-700);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-700) 30%, transparent);
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.markdown a:hover {
+  border-bottom-color: var(--brand-700);
+}
+
+[data-theme='dark'] .markdown a {
+  color: #93c5fd;
+  border-bottom-color: color-mix(in srgb, #93c5fd 35%, transparent);
+}
+[data-theme='dark'] .markdown a:hover {
+  border-bottom-color: #93c5fd;
 }
 
 .markdown code {
-  border-radius: 4px;
-  border: 1px solid var(--ant-color-border);
-  background: color-mix(in srgb, var(--ifm-background-surface-color) 92%, #000 3%);
-  padding: 2px 5px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875em;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 92%, var(--fg) 4%);
+  padding: 2px 6px;
 }
 
 .markdown pre code {
   border: none;
   padding: 0;
   background: transparent;
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
 .markdown blockquote {
-  border-left: 3px solid var(--ifm-color-primary);
-  background: color-mix(in srgb, var(--ifm-color-primary) 6%, transparent);
-  border-radius: 0 6px 6px 0;
-  padding: 8px 16px;
+  border-left: 3px solid var(--brand-500);
+  background: color-mix(in srgb, var(--brand-500) 7%, transparent);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 18px;
+  color: var(--muted-fg);
 }
 
 .markdown table {
@@ -132,92 +234,105 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid var(--ant-color-border);
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
   overflow: hidden;
+  font-size: 14px;
 }
 
 .markdown table th {
-  background: color-mix(in srgb, var(--ifm-background-surface-color) 94%, #000 4%);
+  background: color-mix(in srgb, var(--card) 94%, var(--fg) 4%);
+  font-weight: 600;
+}
+
+.markdown table td,
+.markdown table th {
+  border-bottom: 1px solid var(--line);
+}
+.markdown table tr:last-child td {
+  border-bottom: none;
 }
 
 /* ---------- 侧边栏 ---------- */
 .theme-doc-sidebar-container {
-  border-right: 1px solid var(--ant-color-border) !important;
+  border-right: 1px solid var(--line) !important;
+  background: transparent;
 }
 
-.menu__link {
-  border-radius: 6px;
+.theme-doc-sidebar-container .ant-menu {
   font-size: 14px;
 }
 
-.menu__link--active:not(.menu__link--sublist) {
-  background: color-mix(in srgb, var(--ifm-color-primary) 12%, transparent);
-  color: var(--ifm-color-primary);
+.theme-doc-sidebar-container .ant-menu-item,
+.theme-doc-sidebar-container .ant-menu-submenu-title {
+  height: auto;
+  min-height: 36px;
+  line-height: 1.5;
+  padding-block: 6px;
+  margin-block: 2px;
+  border-radius: 6px;
 }
 
-/* ---------- 目录 ---------- */
+.theme-doc-sidebar-container .ant-menu-item a {
+  color: var(--muted-fg);
+}
+
+.theme-doc-sidebar-container .ant-menu-item-selected a {
+  color: var(--brand-700);
+  font-weight: 500;
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container .ant-menu-item-selected a {
+  color: #bfdbfe;
+}
+
+/* ---------- 右侧目录 ---------- */
 .ant-anchor {
   font-size: 13px;
 }
-
 .ant-anchor-link {
   padding-block: 4px;
 }
-
-.table-of-contents {
-  font-size: 13px;
+.ant-anchor-link-title {
+  color: var(--muted-fg);
+}
+.ant-anchor-link-title-active {
+  color: var(--brand-700);
+  font-weight: 500;
 }
 
-/* ---------- 博客 ---------- */
+/* ---------- 博客卡片 ---------- */
 .blog-list-page article {
-  background: var(--ifm-background-surface-color);
-  border: 1px solid var(--ant-color-border);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 24px;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 200ms ease, transform 200ms ease,
+    border-color 200ms ease;
 }
 
 .blog-list-page article:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .blog-list-page article h2 a {
   color: inherit;
 }
 
-/* ---------- 面包屑 / 编辑链接 ---------- */
-.breadcrumbs__item .breadcrumbs__link {
-  border-radius: 6px;
-  background: transparent;
-  padding: 2px 6px;
-}
-
-.theme-edit-this-page {
-  color: var(--ifm-color-primary);
+/* ---------- 页脚 ---------- */
+.site-footer {
+  background: var(--site-footer-bg);
+  border-top: 1px solid var(--line);
 }
 
 /* ---------- 滚动条 ---------- */
 .thin-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
-
 .thin-scrollbar::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--ifm-font-color-base) 20%, transparent);
-  border-radius: 3px;
-}
-
-/* ---------- 页脚（跟随 data-theme，不依赖 themeConfig.footer.style） ---------- */
-:root {
-  --site-footer-bg: #f5f5f5;
-}
-
-[data-theme='dark'] {
-  --site-footer-bg: #141414;
-}
-
-.site-footer {
-  background: var(--site-footer-bg);
-  border-top: 1px solid var(--ant-color-border);
+  background: var(--line-strong);
+  border-radius: 4px;
 }
