@@ -1,30 +1,209 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * 主题：Ant Design。Infima 只保留必要的排版基线，
+ * 颜色/圆角/间距统一走 antd token 的语义值。
  */
 
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-navbar-height: 64px;
+  --ifm-color-primary: #1677ff;
+  --ifm-color-primary-dark: #0958d9;
+  --ifm-color-primary-darker: #0040b0;
+  --ifm-color-primary-darkest: #002c8c;
+  --ifm-color-primary-light: #4096ff;
+  --ifm-color-primary-lighter: #69b1ff;
+  --ifm-color-primary-lightest: #91caff;
+  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --ifm-heading-font-weight: 600;
+  --ifm-code-font-size: 90%;
+  --ifm-background-surface-color: #ffffff;
+  --ant-color-border: #f0f0f0;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-background-surface-color: #141414;
+  --ifm-background-color: #000000;
+  --ant-color-border: #303030;
+}
+
+/* ---------- 导航栏 ---------- */
+.navbar {
+  height: var(--ifm-navbar-height);
+  padding: 0 24px;
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--ant-color-border);
+  box-shadow: none;
+}
+
+.antd-navbar-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.antd-navbar-brand {
+  text-decoration: none;
+  color: inherit;
+}
+
+.antd-navbar-brand:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.antd-navbar-menu {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.antd-navbar-menu .ant-menu-horizontal {
+  line-height: var(--ifm-navbar-height);
+}
+
+.antd-navbar-burger {
+  display: none !important;
+}
+
+@media (max-width: 996px) {
+  .antd-navbar-burger {
+    display: inline-flex !important;
+  }
+  .antd-navbar-menu {
+    display: none;
+  }
+}
+
+/* ---------- 文档正文排版 ---------- */
+.markdown {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.markdown h1 {
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.markdown h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 40px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ant-color-border);
+}
+
+.markdown h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 28px;
+}
+
+.markdown a {
+  color: var(--ifm-color-primary);
+}
+
+.markdown code {
+  border-radius: 4px;
+  border: 1px solid var(--ant-color-border);
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 92%, #000 3%);
+  padding: 2px 5px;
+}
+
+.markdown pre code {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.markdown blockquote {
+  border-left: 3px solid var(--ifm-color-primary);
+  background: color-mix(in srgb, var(--ifm-color-primary) 6%, transparent);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 16px;
+}
+
+.markdown table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--ant-color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown table th {
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 94%, #000 4%);
+}
+
+/* ---------- 侧边栏 ---------- */
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ant-color-border) !important;
+}
+
+.menu__link {
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  background: color-mix(in srgb, var(--ifm-color-primary) 12%, transparent);
+  color: var(--ifm-color-primary);
+}
+
+/* ---------- 目录 ---------- */
+.ant-anchor {
+  font-size: 13px;
+}
+
+.ant-anchor-link {
+  padding-block: 4px;
+}
+
+.table-of-contents {
+  font-size: 13px;
+}
+
+/* ---------- 博客 ---------- */
+.blog-list-page article {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ant-color-border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: box-shadow 0.2s ease;
+}
+
+.blog-list-page article:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.blog-list-page article h2 a {
+  color: inherit;
+}
+
+/* ---------- 面包屑 / 编辑链接 ---------- */
+.breadcrumbs__item .breadcrumbs__link {
+  border-radius: 6px;
+  background: transparent;
+  padding: 2px 6px;
+}
+
+.theme-edit-this-page {
+  color: var(--ifm-color-primary);
+}
+
+/* ---------- 滚动条 ---------- */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ifm-font-color-base) 20%, transparent);
+  border-radius: 3px;
 }
