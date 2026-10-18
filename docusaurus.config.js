@@ -44,6 +44,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          routeBasePath: '/',
           editUrl: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/tree/main/`,
         },
         blog: {
