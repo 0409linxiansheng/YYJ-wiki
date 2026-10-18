@@ -1,5 +1,5 @@
 import React from 'react';
-import {Col, Row, Typography} from 'antd';
+
 import {useWindowSize} from '@docusaurus/theme-common';
 import {useDoc} from '@docusaurus/plugin-content-docs/client';
 import DocItemPaginator from '@theme/DocItem/Paginator';
@@ -12,7 +12,6 @@ import DocItemContent from '@theme/DocItem/Content';
 import DocBreadcrumbs from '@theme/DocBreadcrumbs';
 import ContentVisibility from '@theme/ContentVisibility';
 
-const {Title: AntTitle} = Typography;
 
 function useDocTOC() {
   const {frontMatter, toc} = useDoc();
@@ -33,8 +32,8 @@ export default function DocItemLayout({children}) {
   const docTOC = useDocTOC();
   const {metadata} = useDoc();
   return (
-    <Row gutter={[40, 24]} wrap>
-      <Col xs={24} lg={docTOC.hidden ? 24 : 17}>
+    <div className="doc-item-layout">
+      <div className="doc-item-main">
         <ContentVisibility metadata={metadata} />
         <DocVersionBanner />
         <article style={{maxWidth: 820}}>
@@ -45,12 +44,8 @@ export default function DocItemLayout({children}) {
           <DocItemFooter />
         </article>
         <DocItemPaginator />
-      </Col>
-      {docTOC.desktop && (
-        <Col xs={0} lg={7}>
-          {docTOC.desktop}
-        </Col>
-      )}
-    </Row>
+      </div>
+      {docTOC.desktop && <div className="doc-item-toc">{docTOC.desktop}</div>}
+    </div>
   );
 }

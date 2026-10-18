@@ -26,11 +26,11 @@ export default function Root({children}) {
         algorithm:
           mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
-          colorPrimary: '#1e40af',
-          colorInfo: '#1e40af',
-          colorLink: '#1e40af',
+          colorPrimary: '#2563eb',
+          colorInfo: '#2563eb',
+          colorLink: '#2563eb',
           borderRadius: 8,
-          fontSize: 15,
+          fontSize: 16,
           fontFamily:
             "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
           fontFamilyCode: "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace",
