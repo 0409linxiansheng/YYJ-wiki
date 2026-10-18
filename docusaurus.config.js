@@ -94,8 +94,7 @@ const config = {
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            to: '/intro',
             position: 'left',
             label: '教程',
           },

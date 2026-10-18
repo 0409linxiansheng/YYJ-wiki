@@ -1,43 +1,51 @@
 import React, {useMemo} from 'react';
 import {Menu} from 'antd';
-import {useHistory} from '@docusaurus/router';
+import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
-function buildItems(items) {
+function stripBaseUrl(href, baseUrl) {
+  if (!href) {
+    return href;
+  }
+  return href.startsWith(baseUrl) ? `/${href.slice(baseUrl.length)}` : href;
+}
+
+function buildItems(items, baseUrl) {
   return items
     .filter((item) => item.type !== 'html')
     .map((item, index) => {
       if (item.type === 'category') {
-        const key = item.href ?? `category-${index}`;
         return {
-          key,
+          key: item.href ?? `category-${index}`,
           label: item.label,
-          children: item.items?.length ? buildItems(item.items) : undefined,
+          children: item.items?.length
+            ? buildItems(item.items, baseUrl)
+            : undefined,
         };
       }
-      return {key: item.href, label: item.label};
+      return {
+        key: item.href,
+        label: <Link to={stripBaseUrl(item.href, baseUrl)}>{item.label}</Link>,
+      };
     });
 }
 
-function findOpenKeys(items, activePath, acc = []) {
+function collectCategoryKeys(items, acc = []) {
   for (const item of items) {
     if (item.children?.length) {
-      if (JSON.stringify(item.children).includes(activePath)) {
-        acc.push(item.key);
-        findOpenKeys(item.children, activePath, acc);
-      }
+      acc.push(item.key);
+      collectCategoryKeys(item.children, acc);
     }
   }
   return acc;
 }
 
 export default function DocSidebarDesktopContent({path, sidebar, className}) {
-  const history = useHistory();
   const {siteConfig} = useDocusaurusContext();
   const baseUrl = siteConfig.baseUrl;
-
-  const items = useMemo(() => buildItems(sidebar), [sidebar]);
-  const defaultOpenKeys = useMemo(() => findOpenKeys(items, path), [items, path]);
+  const items = useMemo(() => buildItems(sidebar, baseUrl), [sidebar, baseUrl]);
+  // 默认展开全部分类，文档结构一眼可见
+  const defaultOpenKeys = useMemo(() => collectCategoryKeys(items), [items]);
 
   return (
     <div className={className}>
@@ -46,17 +54,7 @@ export default function DocSidebarDesktopContent({path, sidebar, className}) {
         selectedKeys={[path]}
         defaultOpenKeys={defaultOpenKeys}
         items={items}
-        onClick={({key}) => {
-          if (typeof key === 'string' && key.startsWith('/')) {
-            const to = key.startsWith(baseUrl) ? key.slice(baseUrl.length - 1) : key;
-            history.push(to);
-          }
-        }}
-        style={{
-          borderInlineEnd: 'none',
-          background: 'transparent',
-          fontSize: 14,
-        }}
+        style={{borderInlineEnd: 'none', background: 'transparent', fontSize: 14}}
       />
     </div>
   );
