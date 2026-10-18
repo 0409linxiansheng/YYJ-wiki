@@ -614,18 +614,27 @@ body {
 }
 
 .kb-themes-col {
-  flex: 7;
+  flex: 4;
   min-width: 0;
 }
 
 .kb-recent-col {
-  flex: 3;
+  flex: 1;
   min-width: 0;
+}
+
+.kb-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
 }
 
 @media (max-width: 996px) {
   .kb-home-cols {
     flex-direction: column;
     gap: 32px;
+  }
+  .kb-theme-grid {
+    grid-template-columns: 1fr;
   }
 }
