@@ -24,8 +24,9 @@
   --line-strong: #d4d4d8;
 
   --site-footer-bg: #f5f5f4;
-  --code-bg: #f6f7f9;
+  --code-bg: #f6f8fa;
   --code-fg: #24292f;
+  --code-border: #d0d7de;
 
   /* 版式与尺寸 */
   --content-max: 1440px;
@@ -74,8 +75,9 @@
   --brand-500: #60a5fa;
 
   --site-footer-bg: #18181b;
-  --code-bg: #16181d;
+  --code-bg: #161b22;
   --code-fg: #e6edf3;
+  --code-border: #30363d;
 
   --ifm-background-color: var(--bg);
   --ifm-background-surface-color: var(--card);
@@ -500,74 +502,122 @@ body {
   }
 }
 
-/* ---------- 代码块（统一描边/圆角，跟随明暗 token） ---------- */
-.markdown pre {
-  background: var(--code-bg) !important;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: none;
-  padding-top: 12px !important;
-  padding-bottom: 12px !important;
-  min-height: 48px;
+/* ---------- 代码块（GitHub 风格：清晰描边 + 充足留白 + 明暗区分） ---------- */
+.markdown .theme-code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 0 16px;
 }
 
-.markdown pre code {
+.markdown .theme-code-block pre {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  box-shadow: none;
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+  min-height: 52px;
+}
+
+.markdown .theme-code-block pre code {
   color: var(--code-fg);
   background: transparent;
 }
 
-.markdown .codeBlockTitle,
-.markdown .codeBlockTitle_node_modules {
-  background: color-mix(in srgb, var(--code-bg) 92%, var(--fg) 6%);
-  border: 1px solid var(--line);
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  color: var(--muted-fg);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 13px;
+/* 每行横向留白，避免代码贴边 */
+.markdown .theme-code-block pre .token-line {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
 }
 
-/* 复制按钮 */
-.markdown .theme-code-block-copy-button,
-.markdown button[aria-label="复制代码到剪贴板"] {
-  color: var(--muted-fg);
-  border-radius: 6px;
-  transition: background 150ms ease, color 150ms ease;
-}
-.markdown button[aria-label="复制代码到剪贴板"]:hover {
-  background: color-mix(in srgb, var(--fg) 8%, transparent);
+/* 标题栏 */
+.markdown .theme-code-block .codeBlockTitle {
+  background: color-mix(in srgb, var(--code-bg) 88%, var(--fg) 8%);
+  border-bottom: 1px solid var(--code-border);
   color: var(--fg);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 8px 16px;
 }
 
-/* ---------- 提示框（admonition）统一为中性卡片 + 类型色左边条 ---------- */
+/* 复制按钮：可见、有描边、hover 变品牌色 */
+.markdown .theme-code-block button[aria-label="复制代码到剪贴板"] {
+  color: var(--muted-fg);
+  background: var(--card);
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+.markdown .theme-code-block button[aria-label="复制代码到剪贴板"]:hover {
+  color: var(--brand-700);
+  border-color: var(--brand-500);
+  background: var(--card);
+}
+
+/* ---------- 行内代码：蓝色底纹，明显区分正文 ---------- */
+.markdown :not(pre) > code {
+  background: color-mix(in srgb, var(--brand-500) 9%, transparent);
+  color: var(--brand-700);
+  border: 1px solid color-mix(in srgb, var(--brand-500) 18%, transparent);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .markdown :not(pre) > code {
+  color: #93c5fd;
+  background: color-mix(in srgb, #3b82f6 18%, transparent);
+  border-color: color-mix(in srgb, #3b82f6 30%, transparent);
+}
+
+/* ---------- 表格：表头底色 + 斑马纹 ---------- */
+.markdown table th {
+  background: color-mix(in srgb, var(--fg) 5%, var(--card));
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.markdown table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--fg) 2.5%, transparent);
+}
+
+/* ---------- 引用块 ---------- */
+.markdown blockquote {
+  border-left: 3px solid var(--brand-500);
+  background: color-mix(in srgb, var(--brand-500) 7%, transparent);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 18px;
+  color: var(--muted-fg);
+}
+
+/* ---------- 提示框（类型色底纹 + 左边条 + 图标同色） ---------- */
+.theme-admonition-note { --acc: #2563eb; }
+.theme-admonition-tip { --acc: #16a34a; }
+.theme-admonition-info { --acc: #0ea5e9; }
+.theme-admonition-caution { --acc: #f59e0b; }
+.theme-admonition-warning { --acc: #f59e0b; }
+.theme-admonition-danger { --acc: #ef4444; }
+
 .theme-admonition {
   border: 1px solid var(--line);
-  border-left-width: 4px;
+  border-left: 4px solid var(--acc);
   border-radius: 10px;
-  background: var(--card);
+  background: color-mix(in srgb, var(--acc) 8%, var(--card));
   color: var(--fg);
   box-shadow: none;
   padding: 14px 18px;
 }
 
-.theme-admonition-note { border-left-color: #2563eb !important; }
-.theme-admonition-tip { border-left-color: #16a34a !important; }
-.theme-admonition-info { border-left-color: #0ea5e9 !important; }
-.theme-admonition-caution { border-left-color: #f59e0b !important; }
-.theme-admonition-warning { border-left-color: #f59e0b !important; }
-.theme-admonition-danger { border-left-color: #ef4444 !important; }
-
 .theme-admonition .theme-admonition-icon,
 .theme-admonition svg {
-  color: currentColor;
+  color: var(--acc);
 }
 
 .theme-admonition .theme-admonition-content {
   color: var(--fg);
-}
-
-[data-theme='dark'] .theme-admonition {
-  background: color-mix(in srgb, var(--card) 60%, transparent);
 }
 
 /* ---------- 知识库首页：主题导航 ---------- */
