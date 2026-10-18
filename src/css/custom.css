@@ -24,6 +24,8 @@
   --line-strong: #d4d4d8;
 
   --site-footer-bg: #f5f5f4;
+  --code-bg: #f6f7f9;
+  --code-fg: #24292f;
 
   /* 版式与尺寸 */
   --content-max: 1440px;
@@ -72,6 +74,8 @@
   --brand-500: #60a5fa;
 
   --site-footer-bg: #18181b;
+  --code-bg: #16181d;
+  --code-fg: #e6edf3;
 
   --ifm-background-color: var(--bg);
   --ifm-background-surface-color: var(--card);
@@ -366,15 +370,28 @@ body {
   --doc-sidebar-width: 260px !important;
 }
 
-/* ---------- 文档详情三栏 ---------- */
+/* ---------- 文档详情三栏（整体居中，最大宽度 1440） ---------- */
+.doc-root-wrapper {
+  width: 100%;
+  flex: 1 0 auto;
+}
+
+.doc-root-flex {
+  display: flex;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
 .doc-item-layout {
   display: flex;
   gap: var(--space-12);
   align-items: flex-start;
+  justify-content: center;
 }
 
 .doc-item-main {
-  flex: 1 1 auto;
+  flex: 0 1 var(--doc-content-max);
   min-width: 0;
   max-width: var(--doc-content-max);
 }
@@ -392,11 +409,36 @@ body {
   .doc-item-layout {
     display: block;
   }
+  .doc-item-main {
+    max-width: 100%;
+  }
 }
 
-/* ---------- 博客正文页 ---------- */
+/* ---------- 博客正文页（居中壳 + 正文/目录两栏） ---------- */
+.blog-post-shell {
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+.blog-post-body {
+  flex: 0 1 760px;
+  min-width: 0;
+}
+
+.blog-post-toc {
+  flex: 0 0 var(--toc-width);
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 24px);
+}
+
 .blog-post-page article {
   max-width: var(--blog-content-max);
+  margin: 0 auto;
 }
 
 .blog-post-page .markdown {
@@ -413,6 +455,18 @@ body {
 .blog-post-page article header .margin-vert--md {
   color: var(--muted-fg);
   font-size: 14px;
+}
+
+@media (max-width: 996px) {
+  .blog-post-toc {
+    display: none;
+  }
+  .blog-post-shell {
+    display: block;
+  }
+  .blog-post-body {
+    max-width: 100%;
+  }
 }
 
 /* 移动端：正文内嵌的「本页目录」折叠块 */
@@ -443,4 +497,71 @@ body {
   .blog-post-page article {
     max-width: 100%;
   }
+}
+
+/* ---------- 代码块（统一描边/圆角，跟随明暗 token） ---------- */
+.markdown pre {
+  background: var(--code-bg) !important;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.markdown pre code {
+  color: var(--code-fg);
+  background: transparent;
+}
+
+.markdown .codeBlockTitle,
+.markdown .codeBlockTitle_node_modules {
+  background: color-mix(in srgb, var(--code-bg) 92%, var(--fg) 6%);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  color: var(--muted-fg);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+}
+
+/* 复制按钮 */
+.markdown .theme-code-block-copy-button,
+.markdown button[aria-label="复制代码到剪贴板"] {
+  color: var(--muted-fg);
+  border-radius: 6px;
+  transition: background 150ms ease, color 150ms ease;
+}
+.markdown button[aria-label="复制代码到剪贴板"]:hover {
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  color: var(--fg);
+}
+
+/* ---------- 提示框（admonition）统一为中性卡片 + 类型色左边条 ---------- */
+.theme-admonition {
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--fg);
+  box-shadow: none;
+  padding: 14px 18px;
+}
+
+.theme-admonition-note { border-left-color: #2563eb !important; }
+.theme-admonition-tip { border-left-color: #16a34a !important; }
+.theme-admonition-info { border-left-color: #0ea5e9 !important; }
+.theme-admonition-caution { border-left-color: #f59e0b !important; }
+.theme-admonition-warning { border-left-color: #f59e0b !important; }
+.theme-admonition-danger { border-left-color: #ef4444 !important; }
+
+.theme-admonition .theme-admonition-icon,
+.theme-admonition svg {
+  color: currentColor;
+}
+
+.theme-admonition .theme-admonition-content {
+  color: var(--fg);
+}
+
+[data-theme='dark'] .theme-admonition {
+  background: color-mix(in srgb, var(--card) 60%, transparent);
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import Layout from '@theme/Layout';
 import {formatDate, stripBaseUrl} from '@site/src/utils/ui';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
@@ -8,7 +9,6 @@ import {
   BlogPostProvider,
   useBlogPost,
 } from '@docusaurus/plugin-content-blog/client';
-import BlogLayout from '@theme/BlogLayout';
 import BlogPostItem from '@theme/BlogPostItem';
 import BlogPostPaginator from '@theme/BlogPostPaginator';
 import BlogPostPageMetadata from '@theme/BlogPostPage/Metadata';
@@ -72,27 +72,29 @@ function BlogPostPageContent({sidebar, children}) {
     toc_min_heading_level: tocMinHeadingLevel,
     toc_max_heading_level: tocMaxHeadingLevel,
   } = frontMatter;
+  const showToc = !hideTableOfContents && toc.length > 0;
   return (
-    <BlogLayout
-      toc={
-        !hideTableOfContents && toc.length > 0 ? (
-          <TOC
-            toc={toc}
-            minHeadingLevel={tocMinHeadingLevel}
-            maxHeadingLevel={tocMaxHeadingLevel}
-          />
-        ) : undefined
-      }>
-      <ContentVisibility metadata={metadata} />
-
-      <BlogPostItem>{children}</BlogPostItem>
-
-      {(nextItem || prevItem) && (
-        <BlogPostPaginator nextItem={nextItem} prevItem={prevItem} />
-      )}
-
-      <RelatedArticles />
-    </BlogLayout>
+    <Layout title={metadata.title} description={metadata.description}>
+      <div className="blog-post-shell">
+        {showToc && (
+          <aside className="blog-post-toc">
+            <TOC
+              toc={toc}
+              minHeadingLevel={tocMinHeadingLevel}
+              maxHeadingLevel={tocMaxHeadingLevel}
+            />
+          </aside>
+        )}
+        <div className="blog-post-body">
+          <ContentVisibility metadata={metadata} />
+          <BlogPostItem>{children}</BlogPostItem>
+          {(nextItem || prevItem) && (
+            <BlogPostPaginator nextItem={nextItem} prevItem={prevItem} />
+          )}
+          <RelatedArticles />
+        </div>
+      </div>
+    </Layout>
   );
 }
 
