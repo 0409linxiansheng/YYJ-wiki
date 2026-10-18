@@ -417,6 +417,7 @@ body {
 /* ---------- 博客正文页（居中壳 + 正文/目录两栏） ---------- */
 .blog-post-shell {
   display: flex;
+  width: 100%;
   gap: var(--space-12);
   align-items: flex-start;
   justify-content: center;
@@ -593,4 +594,10 @@ body {
   background: color-mix(in srgb, var(--brand-500) 12%, transparent);
   color: var(--brand-700);
   font-weight: 500;
+}
+
+
+/* ---------- 修复：flex 容器里 max-width 区块被收缩 ---------- */
+.main-wrapper > section {
+  width: 100%;
 }
