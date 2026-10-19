@@ -114,6 +114,8 @@ const config = {
           editUrl: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/tree/main/`,
         },
         blog: {
+          blogTitle: '博客',
+          blogDescription: '记录业务思考与行业观察',
           showReadingTime: true,
           remarkPlugins: [math, footnotes],
           rehypePlugins: [katex],
