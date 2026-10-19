@@ -27,4 +27,4 @@ npm run serve      # 预览生产构建
 ## 部署
 
 推到 `main` 分支，GitHub Actions 自动构建并发布到
-`https://0409linxiansheng.github.io/YYJ-wiki/`。
+`https://yyj-lin.github.io/YYJ-wiki/`。

@@ -12,7 +12,7 @@ import footnotes from 'remark-footnotes';
 //   部署到 https://<user>.github.io/<repo>/
 // 如果仓库名是 <user>.github.io（用户/组织主页），把 baseUrl 改成 '/'
 // ============================================================
-const GITHUB_USER = '0409linxiansheng';
+const GITHUB_USER = 'YYJ-lin';
 const GITHUB_REPO = 'YYJ-wiki';
 
 /** @type {import('@docusaurus/types').Config} */
@@ -36,7 +36,7 @@ const config = {
     v4: true,
   },
 
-  url: `https://${GITHUB_USER}.github.io`,
+  url: `https://${GITHUB_USER.toLowerCase()}.github.io`,
   baseUrl: `/${GITHUB_REPO}/`,
   organizationName: GITHUB_USER,
   projectName: GITHUB_REPO,

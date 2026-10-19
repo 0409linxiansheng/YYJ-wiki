@@ -7,12 +7,12 @@ import {useColorMode} from '@docusaurus/theme-common';
 // 开启步骤：
 //   1. 仓库 Settings → Features → 勾选 Discussions（开启讨论区）
 //   2. 打开 https://giscus.app/zh-CN
-//   3. 填入仓库名 0409linxiansheng/YYJ-wiki，选一个分类
+//   3. 填入仓库名 YYJ-lin/YYJ-wiki，选一个分类
 //   4. 页面下方会生成 data-repo-id 和 data-category-id，填到下面两个空值里
 // 填好 repoId 和 categoryId 后，文末就会自动出现评论区。
 // ============================================================
 const GISCUS_CONFIG = {
-  repo: '0409linxiansheng/YYJ-wiki',
+  repo: 'YYJ-lin/YYJ-wiki',
   repoId: 'TODO_REPO_ID', // 替换为 giscus 给的 repo-id
   category: 'General',
   categoryId: 'TODO_CATEGORY_ID', // 替换为 giscus 给的 category-id

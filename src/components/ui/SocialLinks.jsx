@@ -63,7 +63,7 @@ export default function SocialLinks({className}) {
   const fields = siteConfig.customFields ?? {};
   const [open, setOpen] = useState(null);
 
-  const github = fields.github ?? 'https://github.com/0409linxiansheng/YYJ-wiki';
+  const github = fields.github ?? 'https://github.com/YYJ-lin/YYJ-wiki';
   const wechatQr = useBaseUrl(fields.wechatQr ?? '/img/wechat-qr.png');
   const qqQr = useBaseUrl(fields.qqQr ?? '/img/qq-qr.png');
 
