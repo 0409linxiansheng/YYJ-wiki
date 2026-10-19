@@ -141,6 +141,7 @@ const config = {
         items: [
           {to: '/kb', label: '知识库', position: 'left'},
           {to: '/blog', label: '博客', position: 'left'},
+          {to: '/about', label: '关于我们', position: 'left'},
           {
             href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
             label: 'GitHub',
@@ -163,7 +164,7 @@ const config = {
           {
             title: '关于',
             items: [
-              {label: '关于本站', to: '/about'},
+              {label: '关于我们', to: '/about'},
               {label: '写作指南', to: '/about/writing-guide'},
               {label: '组件演示', to: '/about/components'},
             ],
