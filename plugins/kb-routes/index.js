@@ -1,25 +1,25 @@
-const ORDER = ['erpnext', 'wordpress', 'devops', 'guide'];
+const ORDER = ['business', 'industry', 'tools', 'about'];
 
 const CATEGORY_META = {
-  erpnext: {
-    label: 'ERPNext 教程',
-    desc: 'Frappe / ERPNext 的安装、二次开发与扩展实践',
-    icon: 'database',
+  business: {
+    label: '业务分享',
+    desc: '项目复盘、方法论与真实场景里的取舍',
+    icon: 'project',
   },
-  wordpress: {
-    label: 'WordPress 教程',
-    desc: '建站、主题与插件实践',
+  industry: {
+    label: '行业知识',
+    desc: '术语、政策、案例与行业常识的整理',
     icon: 'global',
   },
-  devops: {
-    label: '部署运维',
-    desc: 'Linux、Docker、备份与故障排查',
-    icon: 'cloud-server',
+  tools: {
+    label: '工具资源',
+    desc: '常用工具、模板与配置集合',
+    icon: 'tool',
   },
-  guide: {
-    label: '建站指南',
-    desc: '本站的搭建、维护与定制说明',
-    icon: 'read',
+  about: {
+    label: '关于本站',
+    desc: '站点说明、写作指南与组件演示',
+    icon: 'info',
   },
 };
 

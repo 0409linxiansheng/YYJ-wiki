@@ -45,14 +45,14 @@ export default function KbHome() {
           </Title>
           <Paragraph
             style={{color: 'var(--muted-fg)', fontSize: 16, maxWidth: 560, margin: '0 auto'}}>
-            按主题查找教程、配置指南和问题解决方案。
+            按主题浏览业务分享与行业知识。
           </Paragraph>
           <div style={{maxWidth: 520, margin: '24px auto 0'}}>
             <Input
               size="large"
               readOnly
               prefix={<SearchOutlined style={{color: 'var(--muted-fg)'}} />}
-              placeholder="搜索文档、命令、主题…"
+              placeholder="搜索内容、主题、关键词…"
               onClick={() => window.dispatchEvent(new Event('yyj:open-search'))}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {

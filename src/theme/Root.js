@@ -26,9 +26,9 @@ export default function Root({children}) {
         algorithm:
           mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
-          colorPrimary: '#2563eb',
-          colorInfo: '#2563eb',
-          colorLink: '#2563eb',
+          colorPrimary: '#3b5bdb',
+          colorInfo: '#3b5bdb',
+          colorLink: '#3b5bdb',
           borderRadius: 8,
           fontSize: 16,
           fontFamily:

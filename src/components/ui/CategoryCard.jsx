@@ -7,7 +7,10 @@ import {
   DatabaseOutlined,
   FolderOutlined,
   GlobalOutlined,
+  InfoCircleOutlined,
+  ProjectOutlined,
   ReadOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 
 const {Text} = Typography;
@@ -18,6 +21,9 @@ const ICONS = {
   'cloud-server': <CloudServerOutlined />,
   read: <ReadOutlined />,
   folder: <FolderOutlined />,
+  project: <ProjectOutlined />,
+  tool: <ToolOutlined />,
+  info: <InfoCircleOutlined />,
 };
 
 // 知识库大类卡片

@@ -1,44 +1,30 @@
-# 我的文档站
+# 云屿集
 
-基于 [Docusaurus 3](https://docusaurus.io/zh-CN/) 构建，部署到 GitHub Pages。
+个人知识站点：**业务分享** + **行业知识** + **工具资源**。
+
+基于 [Docusaurus](https://docusaurus.io/zh-CN/) 构建，托管在 GitHub Pages。
 
 ## 本地开发
 
 ```bash
 npm install
-npm start          # http://localhost:3000
+npm start          # 本地热更新
 ```
 
 ## 构建与预览
 
 ```bash
 npm run build      # 产物在 build/
-npm run serve      # 预览生产构建（注意访问 /<baseUrl>/ 路径）
+npm run serve      # 预览生产构建
 ```
 
-## 部署前必改
+## 内容怎么加
 
-`docusaurus.config.js` 顶部两行：
-
-```js
-const GITHUB_USER = 'YOUR_GITHUB_USER';  // 你的 GitHub 用户名/组织名
-const GITHUB_REPO = 'my-website';        // 仓库名
-```
-
-若仓库名为 `<user>.github.io`，把 `baseUrl` 改成 `'/'`。
+- 知识库：`docs/<分类>/<文章>.mdx`
+- 博客：`blog/<日期>-<标题>/index.mdx`
+- 写作说明见站内 `/about/writing-guide`
 
 ## 部署
 
-1. 推到 GitHub 的 `main` 分支；
-2. 仓库 **Settings → Pages → Source** 选择 **GitHub Actions**；
-3. `.github/workflows/deploy.yml` 会自动构建并发布，地址为
-   `https://<GITHUB_USER>.github.io/<GITHUB_REPO>/`。
-
-## 目录
-
-- `docs/` 文档（Markdown/MDX）
-- `blog/` 博客
-- `src/pages/` 自定义页面
-- `src/css/custom.css` 主题样式
-- `static/` 静态资源（含 `.nojekyll`）
-- `.github/workflows/` 部署流水线
+推到 `main` 分支，GitHub Actions 自动构建并发布到
+`https://0409linxiansheng.github.io/YYJ-wiki/`。

@@ -5,10 +5,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {
   ArrowRightOutlined,
-  DatabaseOutlined,
-  ReadOutlined,
-  RocketOutlined,
+  GlobalOutlined,
+  ProjectOutlined,
   SearchOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 import {Button, Card, Col, Flex, Input, Row, Tag, Typography} from 'antd';
 
@@ -16,22 +16,22 @@ const {Title, Paragraph, Text} = Typography;
 
 const ENTRIES = [
   {
-    icon: <DatabaseOutlined />,
-    title: '知识库',
-    desc: 'ERPNext、WordPress、部署运维，按主题整理的技术文档。',
-    to: '/kb',
+    icon: <ProjectOutlined />,
+    title: '业务分享',
+    desc: '项目复盘、方法论，以及真实场景里的取舍。',
+    to: '/business',
   },
   {
-    icon: <ReadOutlined />,
-    title: '博客',
-    desc: '实践、思考与项目记录。',
-    to: '/blog',
+    icon: <GlobalOutlined />,
+    title: '行业知识',
+    desc: '术语、政策、案例，以及行业里的常识。',
+    to: '/industry',
   },
   {
-    icon: <RocketOutlined />,
-    title: '建站指南',
-    desc: '本站的搭建、维护与定制说明。',
-    to: '/guide/intro',
+    icon: <ToolOutlined />,
+    title: '工具资源',
+    desc: '常用工具、模板与配置，拿去就能用。',
+    to: '/tools',
   },
 ];
 
@@ -65,7 +65,7 @@ export default function Home() {
               textTransform: 'uppercase',
               color: 'var(--muted-fg)',
             }}>
-            Documentation / YYJ
+            YUNYU JI · 业务与行业
           </Text>
 
           <Title

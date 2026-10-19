@@ -9,9 +9,9 @@
 /* ---------- 语义色 token（对齐 UI 改造方案） ---------- */
 :root {
   /* 品牌 */
-  --brand: #2563eb;
+  --brand: #3b5bdb;
   --brand-strong: #1d4ed8;
-  --brand-700: #2563eb;
+  --brand-700: #3b5bdb;
   --brand-500: #3b82f6;
   --brand-50: #eff6ff;
 
@@ -43,7 +43,7 @@
   --space-12: 48px;
 
   --ifm-navbar-height: 64px;
-  --ifm-color-primary: #2563eb;
+  --ifm-color-primary: #3b5bdb;
   --ifm-color-primary-dark: #1d4ed8;
   --ifm-color-primary-darker: #1e40af;
   --ifm-color-primary-darkest: #1e3a8a;
@@ -594,7 +594,7 @@ body {
 }
 
 /* ---------- 提示框（类型色底纹 + 左边条 + 图标同色） ---------- */
-.theme-admonition-note { --acc: #2563eb; }
+.theme-admonition-note { --acc: #3b5bdb; }
 .theme-admonition-tip { --acc: #16a34a; }
 .theme-admonition-info { --acc: #0ea5e9; }
 .theme-admonition-caution { --acc: #f59e0b; }

@@ -17,9 +17,9 @@ const GITHUB_REPO = 'YYJ-wiki';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: '我的文档站',
-  tagline: 'Docusaurus 构建 · GitHub Pages 托管',
-  favicon: 'img/favicon.ico',
+  title: '云屿集',
+  tagline: '业务分享与行业知识',
+  favicon: 'img/favicon.svg',
 
   markdown: {
     mermaid: true,
@@ -134,7 +134,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: '我的文档站',
+        title: '云屿集',
         logo: {
           alt: '站点 Logo',
           src: 'img/logo.svg',
@@ -155,44 +155,29 @@ const config = {
           {
             title: '知识库',
             items: [
-              {
-                label: '知识库',
-                to: '/kb',
-              },
-              {
-                label: '建站指南',
-                to: '/guide/intro',
-              },
+              {label: '全部主题', to: '/kb'},
+              {label: '业务分享', to: '/business'},
+              {label: '行业知识', to: '/industry'},
+              {label: '工具资源', to: '/tools'},
             ],
           },
           {
-            title: '社区',
+            title: '关于',
             items: [
-              {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
-              },
+              {label: '关于本站', to: '/about'},
+              {label: '写作指南', to: '/about/writing-guide'},
+              {label: '组件演示', to: '/about/components'},
             ],
           },
           {
             title: '更多',
             items: [
-              {
-                label: '博客',
-                to: '/blog',
-              },
-              {
-                label: 'GitHub',
-                href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
-              },
+              {label: '博客', to: '/blog'},
+              {label: 'GitHub', href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`},
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} 我的文档站 · Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} 云屿集 · Built with Docusaurus.`,
       },
       prism: {
         additionalLanguages: ['diff'],
