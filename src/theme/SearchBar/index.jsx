@@ -98,8 +98,8 @@ export default function SearchBar() {
         footer={null}
         width={640}
         destroyOnHidden
-        title={null}
-        styles={{body: {paddingTop: 8}}}>
+        title="搜索"
+        styles={{body: {paddingTop: 4}}}>
         <Input
           autoFocus
           allowClear

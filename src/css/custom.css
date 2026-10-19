@@ -756,3 +756,15 @@ body {
     margin-right: 0;
   }
 }
+
+/* ---------- 弹窗抖动修复：始终为滚动条预留空间 ---------- */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* antd 弹窗会给 body 加 width: calc(100% - 15px) 来补偿滚动条，
+   但本站滚动容器是 html，滚动条不会消失，导致 body 被白白压窄 15px（画面抖动）。
+   这里把 body 宽度固定回 100%。 */
+html body {
+  width: 100% !important;
+}
