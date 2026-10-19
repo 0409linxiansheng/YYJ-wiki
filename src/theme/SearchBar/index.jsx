@@ -79,11 +79,15 @@ export default function SearchBar() {
   return (
     <>
       <Button
+        className="yyj-search-button"
         onClick={() => setOpen(true)}
         icon={<SearchOutlined />}
         style={{color: 'inherit'}}>
-        搜索
-        <Text type="secondary" style={{fontSize: 12, marginLeft: 8}}>
+        <span className="yyj-search-text">搜索</span>
+        <Text
+          type="secondary"
+          className="yyj-search-hint"
+          style={{fontSize: 12, marginLeft: 8}}>
           Ctrl K
         </Text>
       </Button>

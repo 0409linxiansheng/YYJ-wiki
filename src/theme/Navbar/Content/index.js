@@ -82,7 +82,10 @@ export default function NavbarContent() {
               height={28}
               style={{display: 'block'}}
             />
-            <Text strong style={{fontSize: 16, whiteSpace: 'nowrap'}}>
+            <Text
+              strong
+              className="antd-navbar-brand-text"
+              style={{fontSize: 16, whiteSpace: 'nowrap'}}>
               {siteConfig.title}
             </Text>
           </Flex>
@@ -101,9 +104,11 @@ export default function NavbarContent() {
         <div style={{flex: 1}} />
 
         <Space size={8} align="center">
-          {toMenuItems(rightItems).map((i) => (
-            <span key={i.key}>{i.label}</span>
-          ))}
+          <span className="antd-navbar-right-items">
+            {toMenuItems(rightItems).map((i) => (
+              <span key={i.key}>{i.label}</span>
+            ))}
+          </span>
           <SearchBar />
           <NavbarColorModeToggle />
         </Space>
