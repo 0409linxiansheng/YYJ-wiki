@@ -4,6 +4,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import {useThemeConfig} from '@docusaurus/theme-common';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {Divider, Flex, Layout, Space, Typography, theme} from 'antd';
+import SocialLinks from '@site/src/components/ui/SocialLinks';
 
 const {Text, Link: AntLink} = Typography;
 
@@ -45,6 +46,9 @@ export default function Footer() {
             <Text type="secondary" style={{lineHeight: 1.7}}>
               {siteConfig.tagline}
             </Text>
+            <Flex gap={2} style={{marginTop: 2}}>
+              <SocialLinks />
+            </Flex>
           </Flex>
 
           {/* 区域 2/3/4：内容导航 / 相关资源 / 关于与反馈 */}

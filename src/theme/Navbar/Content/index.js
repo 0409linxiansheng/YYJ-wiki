@@ -10,6 +10,7 @@ import {MenuOutlined} from '@ant-design/icons';
 import NavbarColorModeToggle from '@theme/Navbar/ColorModeToggle';
 import NavbarMobileSidebar from '@theme/Navbar/MobileSidebar';
 import SearchBar from '@theme/SearchBar';
+import SocialLinks from '@site/src/components/ui/SocialLinks';
 
 const {Text} = Typography;
 
@@ -109,6 +110,7 @@ export default function NavbarContent() {
               <span key={i.key}>{i.label}</span>
             ))}
           </span>
+          <SocialLinks />
           <SearchBar />
           <NavbarColorModeToggle />
         </Space>

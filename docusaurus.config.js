@@ -25,6 +25,13 @@ const config = {
     mermaid: true,
   },
 
+  // 社交入口配置：二维码图片放到 static/img/ 下，改这里即可
+  customFields: {
+    github: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
+    wechatQr: '/img/wechat-qr.png',
+    qqQr: '/img/qq-qr.png',
+  },
+
   future: {
     v4: true,
   },
@@ -142,11 +149,6 @@ const config = {
           {to: '/kb', label: '知识库', position: 'left'},
           {to: '/blog', label: '博客', position: 'left'},
           {to: '/about', label: '关于我们', position: 'left'},
-          {
-            href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
-            label: 'GitHub',
-            position: 'right',
-          },
         ],
       },
       footer: {
