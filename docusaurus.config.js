@@ -28,8 +28,8 @@ const config = {
   // 社交入口配置：二维码图片放到 static/img/ 下，改这里即可
   customFields: {
     github: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
-    wechatQr: '/img/wechat-qr.png',
-    qqQr: '/img/qq-qr.png',
+    wechatQr: '/img/wechat-qr.webp',
+    qqQr: '/img/qq-qr.webp',
   },
 
   future: {

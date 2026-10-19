@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import {Button, Modal, Tooltip, Typography} from 'antd';
@@ -64,8 +64,31 @@ export default function SocialLinks({className}) {
   const [open, setOpen] = useState(null);
 
   const github = fields.github ?? 'https://github.com/YYJ-lin/YYJ-wiki';
-  const wechatQr = useBaseUrl(fields.wechatQr ?? '/img/wechat-qr.png');
-  const qqQr = useBaseUrl(fields.qqQr ?? '/img/qq-qr.png');
+  const wechatQr = useBaseUrl(fields.wechatQr ?? '/img/wechat-qr.webp');
+  const qqQr = useBaseUrl(fields.qqQr ?? '/img/qq-qr.webp');
+
+  // 预加载二维码：空闲时后台拉取，鼠标悬停时立刻拉取，点击时基本秒开
+  const prefetch = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    [wechatQr, qqQr].forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, [wechatQr, qqQr]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(prefetch, {timeout: 4000});
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const timer = window.setTimeout(prefetch, 2500);
+    return () => window.clearTimeout(timer);
+  }, [prefetch]);
 
   return (
     <>
@@ -86,6 +109,7 @@ export default function SocialLinks({className}) {
           className={className}
           icon={<WechatOutlined />}
           onClick={() => setOpen('wechat')}
+          onMouseEnter={prefetch}
           aria-label="微信"
         />
       </Tooltip>
@@ -95,6 +119,7 @@ export default function SocialLinks({className}) {
           className={className}
           icon={<QqOutlined />}
           onClick={() => setOpen('qq')}
+          onMouseEnter={prefetch}
           aria-label="QQ"
         />
       </Tooltip>
@@ -104,14 +129,14 @@ export default function SocialLinks({className}) {
         onClose={() => setOpen(null)}
         title="微信"
         src={wechatQr}
-        path={fields.wechatQr ?? '/img/wechat-qr.png'}
+        path={fields.wechatQr ?? '/img/wechat-qr.webp'}
       />
       <QrModal
         open={open === 'qq'}
         onClose={() => setOpen(null)}
         title="QQ"
         src={qqQr}
-        path={fields.qqQr ?? '/img/qq-qr.png'}
+        path={fields.qqQr ?? '/img/qq-qr.webp'}
       />
     </>
   );
