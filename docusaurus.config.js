@@ -153,31 +153,30 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: '知识库',
+            title: '内容导航',
             items: [
-              {label: '全部主题', to: '/kb'},
-              {label: '业务分享', to: '/business'},
-              {label: '行业知识', to: '/industry'},
-              {label: '工具资源', to: '/tools'},
+              {label: '首页', to: '/'},
+              {label: '知识库', to: '/kb'},
+              {label: '博客', to: '/blog'},
             ],
           },
           {
-            title: '关于',
+            title: '相关资源',
             items: [
-              {label: '关于我们', to: '/about'},
+              {label: 'GitHub 仓库', href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`},
               {label: '写作指南', to: '/about/writing-guide'},
               {label: '组件演示', to: '/about/components'},
             ],
           },
           {
-            title: '更多',
+            title: '关于与反馈',
             items: [
-              {label: '博客', to: '/blog'},
-              {label: 'GitHub', href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`},
+              {label: '关于本站', to: '/about'},
+              {label: '反馈与联系', href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/issues`},
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} 云屿集 · Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} 云屿集`,
       },
       prism: {
         additionalLanguages: ['diff'],
