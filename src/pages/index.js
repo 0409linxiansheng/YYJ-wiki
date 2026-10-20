@@ -11,29 +11,21 @@ import {
   ToolOutlined,
 } from '@ant-design/icons';
 import {Button, Card, Col, Flex, Input, Row, Tag, Typography} from 'antd';
+import siteJson from '@site/site.config.json';
 
 const {Title, Paragraph, Text} = Typography;
 
-const ENTRIES = [
-  {
-    icon: <ProjectOutlined />,
-    title: '业务分享',
-    desc: '项目复盘、方法论，以及真实场景里的取舍。',
-    to: '/business',
-  },
-  {
-    icon: <GlobalOutlined />,
-    title: '行业知识',
-    desc: '术语、政策、案例，以及行业里的常识。',
-    to: '/industry',
-  },
-  {
-    icon: <ToolOutlined />,
-    title: '工具资源',
-    desc: '常用工具、模板与配置，拿去就能用。',
-    to: '/tools',
-  },
-];
+const ENTRY_ICONS = {
+  project: <ProjectOutlined />,
+  global: <GlobalOutlined />,
+  tool: <ToolOutlined />,
+  info: <GlobalOutlined />,
+};
+
+const ENTRIES = (siteJson.home?.cards ?? []).map((card) => ({
+  ...card,
+  icon: ENTRY_ICONS[card.icon] ?? <ProjectOutlined />,
+}));
 
 function openSearch() {
   if (typeof window !== 'undefined') {
@@ -65,7 +57,7 @@ export default function Home() {
               textTransform: 'uppercase',
               color: 'var(--muted-fg)',
             }}>
-            YUNYU JI · 业务与行业
+            {siteJson.home?.overline ?? 'YUNYU JI'}
           </Text>
 
           <Title

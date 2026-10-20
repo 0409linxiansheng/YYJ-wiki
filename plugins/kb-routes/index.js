@@ -1,27 +1,15 @@
-const ORDER = ['business', 'industry', 'tools', 'about'];
+const siteJson = require('../../site.config.json');
 
-const CATEGORY_META = {
-  business: {
-    label: '业务分享',
-    desc: '项目复盘、方法论与真实场景里的取舍',
-    icon: 'project',
-  },
-  industry: {
-    label: '行业知识',
-    desc: '术语、政策、案例与行业常识的整理',
-    icon: 'global',
-  },
-  tools: {
-    label: '工具资源',
-    desc: '常用工具、模板与配置集合',
-    icon: 'tool',
-  },
-  about: {
-    label: '关于本站',
-    desc: '站点说明、写作指南与组件演示',
-    icon: 'info',
-  },
-};
+const CATEGORY_ORDER = Object.entries(siteJson.categories ?? {})
+  .sort((a, b) => (a[1].position ?? 99) - (b[1].position ?? 99))
+  .map(([slug]) => slug);
+
+const CATEGORY_META = Object.fromEntries(
+  Object.entries(siteJson.categories ?? {}).map(([slug, c]) => [
+    slug,
+    {label: c.label, desc: c.desc, icon: c.icon ?? 'folder'},
+  ]),
+);
 
 const DEFAULT_META = {label: null, desc: '暂无描述', icon: 'folder'};
 
@@ -92,7 +80,7 @@ module.exports = function kbRoutesPlugin(context) {
       }
 
       const sorted = [...categories.values()].sort(
-        (a, b) => ORDER.indexOf(a.slug) - ORDER.indexOf(b.slug),
+        (a, b) => CATEGORY_ORDER.indexOf(a.slug) - CATEGORY_ORDER.indexOf(b.slug),
       );
 
       const index = {

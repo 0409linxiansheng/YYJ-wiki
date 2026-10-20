@@ -1,6 +1,7 @@
 import React from 'react';
 import {App as AntApp, ConfigProvider, theme as antdTheme} from 'antd';
 import zhCN from 'antd/locale/zh_CN';
+import siteJson from '@site/site.config.json';
 
 // 读取 Docusaurus 写在 <html data-theme> 上的主题，桥接给 antd 的 algorithm
 function useHtmlTheme() {
@@ -26,9 +27,9 @@ export default function Root({children}) {
         algorithm:
           mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
-          colorPrimary: '#3b5bdb',
-          colorInfo: '#3b5bdb',
-          colorLink: '#3b5bdb',
+          colorPrimary: siteJson.theme?.primary ?? '#3b5bdb',
+          colorInfo: siteJson.theme?.primary ?? '#3b5bdb',
+          colorLink: siteJson.theme?.primary ?? '#3b5bdb',
           borderRadius: 8,
           fontSize: 16,
           fontFamily:

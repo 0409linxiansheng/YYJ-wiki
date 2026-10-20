@@ -1,0 +1,59 @@
+{
+  "title": "云屿集",
+  "tagline": "业务分享与行业知识",
+  "favicon": "/img/favicon.svg",
+  "logo": "/img/logo.svg",
+  "theme": { "primary": "#3b5bdb" },
+  "navbar": [
+    { "label": "知识库", "to": "/kb", "position": "left" },
+    { "label": "博客", "to": "/blog", "position": "left" },
+    { "label": "关于我们", "to": "/about", "position": "left" }
+  ],
+  "footer": {
+    "columns": [
+      {
+        "title": "内容导航",
+        "items": [
+          { "label": "首页", "to": "/" },
+          { "label": "知识库", "to": "/kb" },
+          { "label": "博客", "to": "/blog" }
+        ]
+      },
+      {
+        "title": "相关资源",
+        "items": [
+          { "label": "GitHub 仓库", "href": "https://github.com/YYJ-lin/YYJ-wiki" },
+          { "label": "写作指南", "to": "/about/writing-guide" },
+          { "label": "组件演示", "to": "/about/components" }
+        ]
+      },
+      {
+        "title": "关于与反馈",
+        "items": [
+          { "label": "关于本站", "to": "/about" },
+          { "label": "反馈与联系", "href": "https://github.com/YYJ-lin/YYJ-wiki/issues" }
+        ]
+      }
+    ]
+  },
+  "home": {
+    "overline": "YUNYU JI · 业务与行业",
+    "cards": [
+      { "icon": "project", "title": "业务分享", "desc": "项目复盘、方法论，以及真实场景里的取舍。", "to": "/business" },
+      { "icon": "global", "title": "行业知识", "desc": "术语、政策、案例，以及行业里的常识。", "to": "/industry" },
+      { "icon": "tool", "title": "工具资源", "desc": "常用工具、模板与配置，拿去就能用。", "to": "/tools" }
+    ]
+  },
+  "social": {
+    "github": "https://github.com/YYJ-lin/YYJ-wiki",
+    "wechatQr": "/img/wechat-qr.webp",
+    "qqQr": "/img/qq-qr.webp"
+  },
+  "categories": {
+    "business": { "label": "业务分享", "desc": "项目复盘、方法论与真实场景里的取舍", "icon": "project", "position": 1 },
+    "industry": { "label": "行业知识", "desc": "术语、政策、案例与行业常识的整理", "icon": "global", "position": 2 },
+    "tools": { "label": "工具资源", "desc": "常用工具、模板与配置集合", "icon": "tool", "position": 3 },
+    "about": { "label": "关于本站", "desc": "站点说明、写作指南与组件演示", "icon": "info", "position": 4 }
+  },
+  "seo": { "description": "云屿集 · 业务分享与行业知识" }
+}

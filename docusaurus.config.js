@@ -4,6 +4,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import math from 'remark-math';
 import katex from 'rehype-katex';
 import footnotes from 'remark-footnotes';
+import {readFileSync} from 'node:fs';
 
 // ============================================================
 // 只需要改下面这两行，其余配置会自动跟着对齐
@@ -15,11 +16,14 @@ import footnotes from 'remark-footnotes';
 const GITHUB_USER = 'YYJ-lin';
 const GITHUB_REPO = 'YYJ-wiki';
 
+// 站点可编辑配置（由管理后台维护）
+const siteJson = JSON.parse(readFileSync(new URL('./site.config.json', import.meta.url), 'utf8'));
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: '云屿集',
-  tagline: '业务分享与行业知识',
-  favicon: 'img/favicon.svg',
+  title: siteJson.title,
+  tagline: siteJson.tagline,
+  favicon: siteJson.favicon.replace(/^\//, ''),
 
   markdown: {
     mermaid: true,
@@ -27,9 +31,10 @@ const config = {
 
   // 社交入口配置：二维码图片放到 static/img/ 下，改这里即可
   customFields: {
-    github: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
-    wechatQr: '/img/wechat-qr.webp',
-    qqQr: '/img/qq-qr.webp',
+    github: siteJson.social.github ?? `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`,
+    wechatQr: siteJson.social.wechatQr ?? '/img/wechat-qr.webp',
+    qqQr: siteJson.social.qqQr ?? '/img/qq-qr.webp',
+    theme: siteJson.theme,
   },
 
   future: {
@@ -142,45 +147,24 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: '云屿集',
+        title: siteJson.title,
         logo: {
-          alt: '站点 Logo',
-          src: 'img/logo.svg',
+          alt: siteJson.title,
+          src: siteJson.logo.replace(/^\//, ''),
         },
-        items: [
-          {to: '/kb', label: '知识库', position: 'left'},
-          {to: '/blog', label: '博客', position: 'left'},
-          {to: '/about', label: '关于我们', position: 'left'},
-        ],
+        items: siteJson.navbar.map((item) => ({
+          label: item.label,
+          ...(item.href ? {href: item.href} : {to: item.to}),
+          position: item.position ?? 'left',
+        })),
       },
       footer: {
         style: 'dark',
-        links: [
-          {
-            title: '内容导航',
-            items: [
-              {label: '首页', to: '/'},
-              {label: '知识库', to: '/kb'},
-              {label: '博客', to: '/blog'},
-            ],
-          },
-          {
-            title: '相关资源',
-            items: [
-              {label: 'GitHub 仓库', href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`},
-              {label: '写作指南', to: '/about/writing-guide'},
-              {label: '组件演示', to: '/about/components'},
-            ],
-          },
-          {
-            title: '关于与反馈',
-            items: [
-              {label: '关于本站', to: '/about'},
-              {label: '反馈与联系', href: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/issues`},
-            ],
-          },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} 云屿集`,
+        links: siteJson.footer.columns.map((col) => ({
+          title: col.title,
+          items: col.items.map((i) => (i.href ? {label: i.label, href: i.href} : {label: i.label, to: i.to})),
+        })),
+        copyright: `Copyright © ${new Date().getFullYear()} ${siteJson.title}`,
       },
       prism: {
         additionalLanguages: ['diff'],
