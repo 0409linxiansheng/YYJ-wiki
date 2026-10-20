@@ -252,6 +252,15 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
+    /* --- 站点自身的样式（保证预览与前端一致） --- */
+    if (p === '/site-css' && req.method === 'GET') {
+      const cssDir = path.join(SITE_DIR, 'build', 'assets', 'css');
+      const files = fs.existsSync(cssDir) ? fs.readdirSync(cssDir).filter((f) => f.endsWith('.css')) : [];
+      const css = files.map((f) => fs.readFileSync(path.join(cssDir, f), 'utf8')).join('\n');
+      res.writeHead(200, {'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'no-store'});
+      return res.end(css || '/* 还没有构建产物，先运行 npm run build */');
+    }
+
     /* --- 初始化 / 登录 --- */
     if (p === '/api/state' && req.method === 'GET') {
       const settings = loadSettings();

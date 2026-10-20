@@ -45,7 +45,7 @@
       return n;
     },
     code: (b, i) => {
-      const n = el('div', 'be-block be-code');
+      const n = el('div', 'be-block');
       const bar = el('div', 'be-code-bar');
       const lang = el('input', 'be-lang');
       lang.value = b.lang || '';
@@ -65,7 +65,7 @@
       return n;
     },
     admonition: (b, i) => {
-      const n = el('div', 'be-block be-adm be-adm-' + b.kind);
+      const n = el('div', 'be-block theme-admonition theme-admonition-' + b.kind + ' alert');
       const head = el('div', 'be-adm-head');
       const sel = el('select', 'be-adm-kind');
       ['note', 'tip', 'info', 'caution', 'warning', 'danger'].forEach((k) => {
