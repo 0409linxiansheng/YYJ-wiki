@@ -20,6 +20,7 @@ function useHtmlTheme() {
 
 export default function Root({children}) {
   const mode = useHtmlTheme();
+  const primary = siteJson.theme?.primary ?? '#3b5bdb';
   return (
     <ConfigProvider
       locale={zhCN}
@@ -37,6 +38,7 @@ export default function Root({children}) {
           fontFamilyCode: "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace",
         },
       }}>
+      <style>{`:root{--brand:${primary};--brand-700:${primary};--ifm-color-primary:${primary};--ifm-color-primary-dark:${primary};}`}</style>
       <AntApp>{children}</AntApp>
     </ConfigProvider>
   );

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>云屿集 · 内容管理</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e6e8ee; --muted:#8b93a7; --brand:#4f6bed; --ok:#22a06b; --warn:#e0a13c; --err:#e05c5c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--fg); height:100vh; display:flex; flex-direction:column; }
+  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--panel); color:var(--fg); border-radius:8px; padding:6px 12px; }
+  button:hover { border-color:#3a4152; }
+  button.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+  button.danger { color:var(--err); }
+  input, select, textarea { font:inherit; background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:6px 10px; }
+  textarea { width:100%; height:100%; resize:none; border:none; padding:16px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; line-height:1.7; background:var(--panel); outline:none; }
+  .hidden { display:none !important; }
+
+  /* 登录 */
+  #login { margin:auto; width:320px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:28px; }
+  #login h1 { font-size:18px; margin:0 0 6px; }
+  #login p { color:var(--muted); margin:0 0 18px; font-size:13px; }
+  #login input { width:100%; margin-bottom:12px; }
+  #login button { width:100%; }
+
+  /* 主框架 */
+  #app { flex:1; display:flex; flex-direction:column; min-height:0; }
+  header { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header .brand { font-weight:600; margin-right:auto; }
+  main { flex:1; display:flex; min-height:0; }
+  aside { width:260px; border-right:1px solid var(--line); overflow:auto; padding:10px; background:var(--panel); }
+  .group { margin-bottom:14px; }
+  .group > .title { color:var(--muted); font-size:12px; padding:4px 8px; text-transform:uppercase; letter-spacing:.06em; }
+  .item { padding:6px 10px; border-radius:8px; cursor:pointer; display:flex; gap:6px; align-items:center; }
+  .item:hover { background:#1d2230; }
+  .item.active { background:#243055; }
+  .item .del { margin-left:auto; color:var(--muted); visibility:hidden; }
+  .item:hover .del { visibility:visible; }
+
+  section.editor { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .meta { display:flex; gap:10px; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line); }
+  .meta input { flex:1; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:6px; padding:8px 16px; border-bottom:1px solid var(--line); }
+  .toolbar button { padding:4px 9px; font-size:13px; }
+  .split { flex:1; display:flex; min-height:0; }
+  .split .pane { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .split .pane + .pane { border-left:1px solid var(--line); }
+  iframe { flex:1; width:100%; border:none; background:#fff; }
+  .status { padding:8px 16px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; display:flex; gap:12px; }
+  .status .ok { color:var(--ok); } .status .err { color:var(--err); }
+
+  /* 弹窗 */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:50; }
+  .modal .box { width:min(720px,92vw); max-height:82vh; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .modal h2 { margin:0 0 14px; font-size:16px; }
+  .modal .row { margin-bottom:12px; display:flex; gap:10px; }
+  .modal .row label { width:70px; color:var(--muted); }
+  .modal .row input, .modal .row select, .modal .row textarea { flex:1; }
+  .modal textarea { height:340px; border:1px solid var(--line); border-radius:8px; }
+  .hist-item { padding:10px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; display:flex; gap:10px; align-items:center; }
+  .hist-item small { color:var(--muted); }
+  .empty { color:var(--muted); text-align:center; padding:40px; }
+</style>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="login" class="hidden">
+  <h1 id="loginTitle">云屿集 · 内容管理</h1>
+  <p id="loginHint"></p>
+  <input id="password" type="password" placeholder="密码" autocomplete="current-password" />
+  <button class="primary" id="loginBtn">进入</button>
+</div>
+
+<!-- 主界面 -->
+<div id="app" class="hidden">
+  <header>
+    <span class="brand">云屿集 · 内容管理</span>
+    <button id="btnNew">+ 新建</button>
+    <button id="btnHistory">历史</button>
+    <button id="btnSettings">站点设置</button>
+    <button id="btnLogout">退出</button>
+    <button class="primary" id="btnPublish">发布到 GitHub</button>
+  </header>
+  <main>
+    <aside id="tree"></aside>
+    <section class="editor">
+      <div class="meta">
+        <span style="color:var(--muted)" id="currentPath">未选择文章</span>
+        <button id="btnRename" style="margin-left:auto">重命名</button>
+        <button id="btnPreviewDev">打开开发服务器</button>
+      </div>
+      <div class="toolbar" id="toolbar">
+        <button data-ins="h2">标题</button>
+        <button data-ins="bold"><b>B</b></button>
+        <button data-ins="italic"><i>I</i></button>
+        <button data-ins="code">行内代码</button>
+        <button data-ins="codeblock">代码块</button>
+        <button data-ins="table">表格</button>
+        <button data-ins="tip">提示框</button>
+        <button data-ins="tabs">标签页</button>
+        <button data-ins="mermaid">Mermaid</button>
+        <button data-ins="math">公式</button>
+        <button data-ins="footnote">脚注</button>
+        <button data-ins="details">折叠块</button>
+        <button data-ins="link">链接</button>
+        <button data-ins="image">图片</button>
+      </div>
+      <div class="split">
+        <div class="pane"><textarea id="editor" placeholder="选择左侧文章，或点「新建」开始写作"></textarea></div>
+        <div class="pane"><iframe id="preview" src="about:blank"></iframe></div>
+      </div>
+      <div class="status">
+        <span id="statusText">就绪</span>
+        <span style="margin-left:auto" id="dirtyFlag"></span>
+        <button id="btnSave">保存</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 新建 -->
+<div class="modal hidden" id="modalNew"><div class="box">
+  <h2>新建</h2>
+  <div class="row"><label>类型</label><select id="newKind"><option value="doc">知识库文章</option><option value="blog">博客</option></select></div>
+  <div class="row" id="rowCategory"><label>分类</label><select id="newCategory"></select></div>
+  <div class="row"><label>标题</label><input id="newTitle" placeholder="文章标题" /></div>
+  <div class="row"><label>文件名</label><input id="newSlug" placeholder="留空自动生成" /></div>
+  <div style="text-align:right"><button id="btnNewCancel">取消</button> <button class="primary" id="btnNewOk">创建</button></div>
+</div></div>
+
+<!-- 历史 -->
+<div class="modal hidden" id="modalHistory"><div class="box">
+  <h2>发布历史</h2>
+  <div id="historyList"></div>
+  <div style="text-align:right;margin-top:12px"><button id="btnHistoryClose">关闭</button></div>
+</div></div>
+
+<!-- 设置 -->
+<div class="modal hidden" id="modalSettings"><div class="box">
+  <h2>站点设置（site.config.json）</h2>
+  <p style="color:var(--muted);margin-top:-8px">直接编辑 JSON，保存后需重新构建才会生效。</p>
+  <textarea id="settingsJson"></textarea>
+  <div style="text-align:right;margin-top:12px"><button id="btnSettingsClose">关闭</button> <button class="primary" id="btnSettingsSave">保存</button></div>
+</div></div>
+
+<script>
+const DEV_PORT = 3001;
+const state = {docs: [], blog: [], categories: {}, current: null, dirty: false};
+const $ = (id) => document.getElementById(id);
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    credentials: 'same-origin',
+    headers: {'Content-Type': 'application/json'},
+    ...opts,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) { showLogin(true); throw new Error('未登录'); }
+  return data;
+}
+
+function status(text, kind) {
+  const el = $('statusText');
+  el.textContent = text;
+  el.className = kind || '';
+}
+
+/* ---------- 登录 ---------- */
+function showLogin(needsSetup) {
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginHint').textContent = needsSetup ? '首次使用，请设置一个管理密码（至少 4 位）' : '请输入密码';
+  $('loginBtn').textContent = needsSetup ? '设置密码并进入' : '进入';
+  $('loginBtn').dataset.setup = needsSetup ? '1' : '';
+}
+
+$('loginBtn').onclick = async () => {
+  const password = $('password').value;
+  const setup = $('loginBtn').dataset.setup === '1';
+  const data = await api(setup ? '/api/setup' : '/api/login', {method: 'POST', body: JSON.stringify({password})});
+  if (data.error) { $('loginHint').textContent = data.error; return; }
+  boot();
+};
+
+/* ---------- 启动 ---------- */
+async function boot() {
+  const data = await api('/api/state');
+  if (data.needsSetup) return showLogin(true);
+  if (!data.authed) return showLogin(false);
+  state.docs = data.docs; state.blog = data.blog; state.categories = data.categories || {};
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  renderTree();
+  fillCategories();
+  status('已登录 · ' + (data.site.title || ''));
+}
+
+/* ---------- 目录树 ---------- */
+function renderTree() {
+  const groups = {};
+  for (const d of state.docs) (groups[d.category] ||= []).push(d);
+  let html = '';
+  for (const [cat, items] of Object.entries(groups)) {
+    const label = state.categories[cat]?.label || cat;
+    html += `<div class="group"><div class="title">${label}</div>`;
+    for (const it of items) {
+      html += `<div class="item ${state.current?.path === it.path ? 'active' : ''}" data-path="${it.path}" data-kind="doc">
+        <span>${it.title}</span><span class="del" data-del="${it.path}">✕</span></div>`;
+    }
+    html += '</div>';
+  }
+  if (state.blog.length) {
+    html += `<div class="group"><div class="title">博客</div>`;
+    for (const it of state.blog) {
+      html += `<div class="item ${state.current?.path === it.path ? 'active' : ''}" data-path="${it.path}" data-kind="blog">
+        <span>${it.title}</span><span class="del" data-del="${it.path}">✕</span></div>`;
+    }
+    html += '</div>';
+  }
+  $('tree').innerHTML = html || '<div class="empty">还没有文章</div>';
+}
+
+$('tree').onclick = async (e) => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    if (!confirm('确定删除这篇文章？（发布后才会真正删除线上）')) return;
+    await api('/api/doc/delete', {method: 'POST', body: JSON.stringify({path: del.dataset.del})});
+    const data = await api('/api/state');
+    state.docs = data.docs; state.blog = data.blog; state.categories = data.categories || {}; renderTree();
+    return;
+  }
+  const item = e.target.closest('[data-path]');
+  if (!item) return;
+  await openDoc(item.dataset.path);
+};
+
+async function openDoc(path) {
+  const data = await api('/api/doc?path=' + encodeURIComponent(path));
+  state.current = {path, content: data.content};
+  state.dirty = false;
+  $('editor').value = data.content;
+  $('currentPath').textContent = path;
+  $('dirtyFlag').textContent = '';
+  $('statusText').textContent = '已加载';
+  renderTree();
+  startPreview();
+}
+
+/* ---------- 编辑器 ---------- */
+$('editor').oninput = () => {
+  state.dirty = true;
+  $('dirtyFlag').textContent = '未保存';
+};
+
+const SNIPPETS = {
+  h2: () => '\n## 小标题\n',
+  bold: () => '**加粗文字**',
+  italic: () => '*斜体文字*',
+  code: () => '`代码`',
+  codeblock: () => '\n```bash\n命令\n```\n',
+  table: () => '\n| 列一 | 列二 |\n| --- | --- |\n| 内容 | 内容 |\n',
+  tip: () => '\n::::tip[标题]\n内容\n::::\n',
+  tabs: () => '\n<Tabs>\n  <TabItem value="a" label="甲" default>内容甲</TabItem>\n  <TabItem value="b" label="乙">内容乙</TabItem>\n</Tabs>\n',
+  mermaid: () => '\n```mermaid\ngraph TD\n  A[开始] --> B[结束]\n```\n',
+  math: () => '\n$$\nE = mc^2\n$$\n',
+  footnote: () => '文字[^1]\n\n[^1]: 脚注内容\n',
+  details: () => '\n<details>\n  <summary>点我展开</summary>\n\n隐藏内容\n\n</details>\n',
+  link: () => '[链接文字](https://example.com)',
+  image: () => '![图片说明](/img/图片.png)',
+};
+
+$('toolbar').onclick = (e) => {
+  const btn = e.target.closest('[data-ins]');
+  if (!btn) return;
+  const ta = $('editor');
+  const fn = SNIPPETS[btn.dataset.ins];
+  if (!fn) return;
+  const insert = fn();
+  ta.setRangeText(insert, ta.selectionStart, ta.selectionEnd, 'end');
+  ta.focus();
+  state.dirty = true;
+  $('dirtyFlag').textContent = '未保存';
+};
+
+/* ---------- 保存 / 预览 ---------- */
+$('btnSave').onclick = async () => {
+  if (!state.current) return;
+  await api('/api/doc/save', {method: 'POST', body: JSON.stringify({path: state.current.path, content: $('editor').value})});
+  state.dirty = false;
+  $('dirtyFlag').textContent = '已保存';
+  status('已保存到本地文件', 'ok');
+  updatePreview();
+};
+
+function routeOf(path) {
+  if (!path) return '/';
+  if (path.startsWith('blog/')) {
+    const item = state.blog.find((b) => b.path === path);
+    return item ? item.route : '/blog';
+  }
+  const item = state.docs.find((d) => d.path === path);
+  return item ? item.route : '/';
+}
+
+async function startPreview() {
+  status('正在启动预览服务…');
+  const res = await api('/api/dev/start', {method: 'POST'});
+  if (!res.running) { status('预览服务启动失败，请手动运行 npm start', 'err'); return; }
+  status('预览已就绪', 'ok');
+  updatePreview();
+}
+
+function updatePreview() {
+  if (!state.current) return;
+  const route = routeOf(state.current.path);
+  const base = '/YYJ-wiki';
+  $('preview').src = `http://${location.hostname}:${DEV_PORT}${base}${route}?t=${Date.now()}`;
+}
+
+$('btnPreviewDev').onclick = () => {
+  window.open(`http://${location.hostname}:${DEV_PORT}/YYJ-wiki/`, '_blank');
+};
+
+/* ---------- 新建 ---------- */
+function fillCategories() {
+  const cats = [...new Set(state.docs.map((d) => d.category))];
+  $('newCategory').innerHTML = cats.map((c) => `<option value="${c}">${c}</option>`).join('');
+}
+
+$('btnNew').onclick = () => { $('modalNew').classList.remove('hidden'); $('newTitle').focus(); };
+$('btnNewCancel').onclick = () => $('modalNew').classList.add('hidden');
+$('newKind').onchange = () => { $('rowCategory').style.display = $('newKind').value === 'blog' ? 'none' : 'flex'; };
+
+$('btnNewOk').onclick = async () => {
+  const kind = $('newKind').value;
+  const title = $('newTitle').value.trim();
+  if (!title) return;
+  const data = await api('/api/doc/create', {method: 'POST', body: JSON.stringify({
+    kind, category: $('newCategory').value, title, slug: $('newSlug').value.trim(),
+  })});
+  $('modalNew').classList.add('hidden');
+  $('newTitle').value = ''; $('newSlug').value = '';
+  const s = await api('/api/state');
+  state.docs = s.docs; state.blog = s.blog;
+  renderTree(); fillCategories();
+  if (data.path) await openDoc(data.path);
+};
+
+/* ---------- 发布 ---------- */
+$('btnPublish').onclick = async () => {
+  const st = await api('/api/git/status');
+  if (!st.files.length) { status('没有需要发布的改动', 'ok'); return; }
+  const list = st.files.map((f) => `${f.status} ${f.path}`).join('\n');
+  if (!confirm(`将发布以下 ${st.files.length} 个文件：\n\n${list}\n\n确认推送？`)) return;
+  status('正在推送…');
+  const data = await api('/api/publish', {method: 'POST', body: JSON.stringify({})});
+  status(data.ok ? '已推送，约 2 分钟后上线' : '推送失败：' + (data.error || data.output), data.ok ? 'ok' : 'err');
+};
+
+/* ---------- 历史 ---------- */
+$('btnHistory').onclick = async () => {
+  const list = await api('/api/history?limit=20');
+  $('historyList').innerHTML = list.map((h) => `
+    <div class="hist-item">
+      <div style="flex:1"><div>${h.message}</div><small>${h.sha.slice(0,7)} · ${h.date}</small></div>
+      <button data-view="${h.sha}">查看</button>
+      <button class="danger" data-revert="${h.sha}">回滚</button>
+    </div>`).join('') || '<div class="empty">暂无历史</div>';
+  $('modalHistory').classList.remove('hidden');
+};
+$('btnHistoryClose').onclick = () => $('modalHistory').classList.add('hidden');
+$('historyList').onclick = async (e) => {
+  const view = e.target.closest('[data-view]');
+  const revert = e.target.closest('[data-revert]');
+  if (view) {
+    const data = await api('/api/history/show?sha=' + view.dataset.view);
+    alert(data.out.slice(0, 2000));
+  }
+  if (revert) {
+    if (!confirm('回滚这次提交？会生成一个新的提交并推送。')) return;
+    const data = await api('/api/history/revert', {method: 'POST', body: JSON.stringify({sha: revert.dataset.revert})});
+    status(data.ok ? '已回滚并推送' : '回滚失败：' + (data.error || data.output), data.ok ? 'ok' : 'err');
+    $('modalHistory').classList.add('hidden');
+  }
+};
+
+/* ---------- 设置 ---------- */
+$('btnSettings').onclick = async () => {
+  const cfg = await api('/api/settings');
+  $('settingsJson').value = JSON.stringify(cfg, null, 2);
+  $('modalSettings').classList.remove('hidden');
+};
+$('btnSettingsClose').onclick = () => $('modalSettings').classList.add('hidden');
+$('btnSettingsSave').onclick = async () => {
+  try {
+    const cfg = JSON.parse($('settingsJson').value);
+    await api('/api/settings', {method: 'POST', body: JSON.stringify(cfg)});
+    status('站点配置已保存，发布后生效', 'ok');
+    $('modalSettings').classList.add('hidden');
+  } catch (err) {
+    alert('JSON 格式错误：' + err.message);
+  }
+};
+
+/* ---------- 退出 ---------- */
+$('btnLogout').onclick = async () => { await api('/api/logout', {method: 'POST'}); location.reload(); };
+
+/* ---------- 重命名 ---------- */
+$('btnRename').onclick = async () => {
+  if (!state.current) return;
+  const next = prompt('新的文件路径（相对仓库根）', state.current.path);
+  if (!next || next === state.current.path) return;
+  await api('/api/doc/rename', {method: 'POST', body: JSON.stringify({path: state.current.path, newPath: next})});
+  const s = await api('/api/state');
+  state.docs = s.docs; state.blog = s.blog;
+  renderTree();
+  await openDoc(next);
+};
+
+boot().catch(() => showLogin(false));
+</script>
+</body>
+</html>
