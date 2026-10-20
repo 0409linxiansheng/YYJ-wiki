@@ -147,6 +147,16 @@ function walk(dir, out = []) {
   return out;
 }
 
+function collectText(dir, out = []) {
+  if (!fs.existsSync(dir)) return out;
+  for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) collectText(full, out);
+    else if (/\.(mdx?|jsx?|tsx?)$/.test(entry.name)) out.push(fs.readFileSync(full, 'utf8'));
+  }
+  return out;
+}
+
 function listDocs() {
   const docsDir = path.join(SITE_DIR, 'docs');
   const items = walk(docsDir).map((file) => {
@@ -453,6 +463,32 @@ const server = http.createServer(async (req, res) => {
         await new Promise((r) => setTimeout(r, 500));
       }
       return json(res, 200, {ok: true, running: await portOpen(3001)});
+    }
+
+    if (p === '/api/history/file' && req.method === 'GET') {
+      const rel = url.searchParams.get('path') || '';
+      const {out} = await run('git', ['log', '--follow', '-20', '--pretty=format:%H|%ad|%s', '--date=format:%Y-%m-%d %H:%M', '--', rel]);
+      const list = out.split('\n').filter(Boolean).map((line) => {
+        const [sha, date, message] = line.split('|');
+        return {sha, date, message};
+      });
+      return json(res, 200, list);
+    }
+
+    if (p === '/api/assets' && req.method === 'GET') {
+      const dir = path.join(SITE_DIR, 'static', 'img');
+      if (!fs.existsSync(dir)) return json(res, 200, []);
+      const refs = ['docs', 'blog', 'src'].flatMap((d) => collectText(path.join(SITE_DIR, d))).join('\n');
+      const list = fs.readdirSync(dir)
+        .filter((f) => /\.(png|jpe?g|webp|svg|gif|ico)$/i.test(f))
+        .map((f) => {
+          const stat = fs.statSync(path.join(dir, f));
+          const escaped = f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const count = (refs.match(new RegExp(escaped, 'g')) || []).length;
+          return {name: f, url: `/img/${f}`, size: stat.size, refs: count, mtime: stat.mtimeMs};
+        })
+        .sort((a, b) => b.mtime - a.mtime);
+      return json(res, 200, list);
     }
 
     /* --- 图片上传 --- */

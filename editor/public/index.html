@@ -97,6 +97,7 @@
     <button id="btnNew">+ 新建</button>
     <button id="btnHistory">历史</button>
     <button id="btnSettings">站点设置</button>
+    <button id="btnAssets">图片库</button>
     <button id="btnLogout">退出</button>
     <button class="primary" id="btnPublish">发布到 GitHub</button>
   </header>
@@ -106,6 +107,7 @@
       <div class="meta">
         <span style="color:var(--muted)" id="currentPath">未选择文章</span>
         <button id="btnPublishDraft" class="hidden">发布这篇草稿</button>
+        <button id="btnFileHistory">本文历史</button>
         <button id="btnRename" style="margin-left:auto">重命名</button>
         <button id="btnPreviewDev">打开开发服务器</button>
       </div>
@@ -177,6 +179,18 @@
 
 <input type="file" id="imgFile" accept="image/*" hidden />
 
+<div class="modal hidden" id="modalAssets"><div class="box" style="width:min(880px,94vw)">
+  <h2>图片库</h2>
+  <div id="assetsList"></div>
+  <div style="text-align:right;margin-top:12px"><button id="btnAssetsClose">关闭</button></div>
+</div></div>
+
+<div class="modal hidden" id="modalFileHistory"><div class="box" style="width:min(760px,94vw)">
+  <h2>本文历史</h2>
+  <div id="fileHistoryList"></div>
+  <div style="text-align:right;margin-top:12px"><button id="btnFileHistoryClose">关闭</button></div>
+</div></div>
+
 <script>
 const DEV_PORT = 3001;
 const state = {docs: [], blog: [], drafts: [], categories: {}, current: null, dirty: false};
@@ -226,6 +240,7 @@ async function boot() {
   $('app').classList.remove('hidden');
   renderTree();
   fillCategories();
+  api('/api/dev/start', {method: 'POST'}).catch(() => {});
   status('已登录 · ' + (data.site.title || ''));
 }
 
@@ -570,6 +585,48 @@ $('btnSettingsSave').onclick = async () => {
   await api('/api/settings', {method: 'POST', body: JSON.stringify(cfg)});
   status('站点配置已保存，发布后生效', 'ok');
   $('modalSettings').classList.add('hidden');
+};
+
+/* ---------- 图片库 ---------- */
+$('btnAssets').onclick = async () => {
+  const list = await api('/api/assets');
+  $('assetsList').innerHTML = list.map((a) => `
+    <div class="hist-item">
+      <img src="${a.url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;background:#fff" />
+      <div style="flex:1"><div>${a.name}</div>
+        <small>${(a.size / 1024).toFixed(0)} KB · ${a.refs ? '被引用 ' + a.refs + ' 次' : '⚠ 未被引用'}</small></div>
+      <button data-copy="${a.url}">复制路径</button>
+    </div>`).join('') || '<div class="empty">暂无图片</div>';
+  $('modalAssets').classList.remove('hidden');
+};
+$('btnAssetsClose').onclick = () => $('modalAssets').classList.add('hidden');
+$('assetsList').onclick = (e) => {
+  const c = e.target.closest('[data-copy]');
+  if (!c) return;
+  navigator.clipboard.writeText(c.dataset.copy);
+  status('已复制 ' + c.dataset.copy, 'ok');
+};
+
+/* ---------- 单文件历史 ---------- */
+$('btnFileHistory').onclick = async () => {
+  if (!state.current) return;
+  const list = await api('/api/history/file?path=' + encodeURIComponent(state.current.path));
+  $('fileHistoryList').innerHTML = list.map((h) => `
+    <div class="hist-item">
+      <div style="flex:1"><div>${h.message}</div><small>${h.sha.slice(0, 7)} · ${h.date}</small></div>
+      <button class="danger" data-restore="${h.sha}">恢复此版本</button>
+    </div>`).join('') || '<div class="empty">暂无历史</div>';
+  $('modalFileHistory').classList.remove('hidden');
+};
+$('btnFileHistoryClose').onclick = () => $('modalFileHistory').classList.add('hidden');
+$('fileHistoryList').onclick = async (e) => {
+  const b = e.target.closest('[data-restore]');
+  if (!b) return;
+  if (!confirm('恢复这篇文章到这个版本？')) return;
+  const data = await api('/api/history/revert', {method: 'POST', body: JSON.stringify({sha: b.dataset.restore, path: state.current.path})});
+  status(data.ok ? '已恢复，记得再点发布' : '恢复失败：' + (data.error || ''), data.ok ? 'ok' : 'err');
+  $('modalFileHistory').classList.add('hidden');
+  if (data.ok) openDoc(state.current.path);
 };
 
 /* ---------- 退出 ---------- */
