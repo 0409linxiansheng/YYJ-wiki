@@ -78,9 +78,9 @@
   .loading { display:inline-block; width:12px; height:12px; border:2px solid var(--line); border-top-color:var(--brand); border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; }
   @keyframes spin { to { transform:rotate(360deg); } }
   /* 块编辑器 */
-  .be-toolbar { display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel); z-index:2; }
+  .be-toolbar { display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; justify-content:center; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel); z-index:2; }
   .be-toolbar button { font-size:13px; padding:4px 9px; }
-  .be-area { padding:18px 22px 80px; }
+  .be-area { max-width:760px; margin:0 auto; padding:28px 32px 120px; font-size:15.5px; line-height:1.85; }
   .be-wrap { position:relative; margin:2px 0; }
   .be-wrap:hover { background:#f7f8fb; }
   .be-actions { position:absolute; right:4px; top:2px; display:none; gap:2px; }
@@ -89,14 +89,14 @@
   .be-text { outline:none; min-height:1.4em; white-space:pre-wrap; }
   .be-text:empty:before { content:attr(data-placeholder); color:#b0b6c3; }
   .be-heading { font-weight:650; line-height:1.3; }
-  .be-h1 { font-size:26px; } .be-h2 { font-size:22px; } .be-h3 { font-size:18px; } .be-h4 { font-size:16px; }
-  .be-para { font-size:15px; line-height:1.8; }
+  .be-h1 { font-size:32px; } .be-h2 { font-size:24px; } .be-h3 { font-size:19px; } .be-h4 { font-size:16px; }
+  .be-para { font-size:15.5px; line-height:1.85; }
   .be-code { border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:8px 0; }
   .be-code-bar { display:flex; gap:8px; align-items:center; padding:6px 10px; background:#f6f8fa; border-bottom:1px solid var(--line); }
   .be-lang { width:90px; padding:2px 6px; font-size:12px; }
   .be-code-title { color:var(--muted); font-size:12px; }
-  .be-code-body { margin:0; padding:12px 14px; background:#161b22; overflow:auto; }
-  .be-code-inner { outline:none; white-space:pre; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; line-height:1.7; color:#c9d1d9; }
+  .be-code-body { margin:0; padding:12px 14px; background:#f6f8fa; border-top:1px solid var(--line); overflow:auto; }
+  .be-code-inner { outline:none; white-space:pre; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; line-height:1.7; color:#1f2328; }
   .be-adm { border-left:4px solid var(--brand); background:rgba(79,107,237,.08); border-radius:8px; padding:10px 14px; margin:8px 0; }
   .be-adm-tip { border-color:#22a06b; background:rgba(34,160,107,.08); }
   .be-adm-info { border-color:#0ea5e9; background:rgba(14,165,233,.08); }
@@ -215,12 +215,12 @@
         <button id="btnRestoreDraft">恢复草稿</button>
         <button id="btnDiscardDraft">忽略</button>
       </div>
-      <div id="blockPane" class="pane" style="display:none;overflow:auto;background:#0f1115"></div>
+      <div id="blockPane" class="pane" style="display:none;overflow:auto;background:#fff"></div>
       <div class="split">
         <div class="pane"><textarea id="editor" placeholder="选择左侧文章，或点「新建」开始写作"></textarea></div>
         <div class="pane" style="position:relative">
           <iframe id="preview" src="about:blank" onload="document.getElementById('previewMask').style.display='none'"></iframe>
-          <div id="previewMask" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;background:#0f1115;color:#8b93a7;font-size:13px">
+          <div id="previewMask" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;background:#fff;color:#6b7280;font-size:13px">
             <span class="loading"></span>
             <span id="previewMaskText">预览加载中…</span>
             <div style="display:flex;gap:10px">
