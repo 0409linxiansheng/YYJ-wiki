@@ -102,13 +102,34 @@ sidebar_position: 1
 
 类型有 `note / tip / info / caution / warning / danger` 六种。
 
-### 代码块
+### 代码块（最常用）
 
-```md
-```jsx title="文件名.js" showLineNumbers
-// 代码
+只要记住「三个反引号」：
+
+````md
+```bash
+sudo apt update
 ```
+````
+
+- 第一行写语言名（不写也行，只是没有高亮）
+- 最后一行再写三个反引号收尾
+
+常用语言名：`bash` `js` `jsx` `ts` `json` `yaml` `html` `css` `python` `sql`
+
+想显示文件名和行号：
+
+````md
+```jsx title="Hello.js" showLineNumbers
+export default function Hello() {
+  return <div>你好</div>;
+}
 ```
+````
+
+::::tip[不想手打这些符号]
+在 VS Code 里输入 `cb` 再按 Tab，会自动生成代码块骨架；`cbt` 生成带标题的代码块。详见本章最后的「VS Code 快捷片段」。
+::::
 
 ### 代码 Diff
 
@@ -160,6 +181,22 @@ graph TD
   隐藏内容
 </details>
 ```
+
+### VS Code 快捷片段
+
+仓库里已经放了 `.vscode/markdown.code-snippets`。在 VS Code 里编辑 `.mdx` 文件时，输入下面的缩写再按 **Tab**，会自动生成对应结构：
+
+| 输入 | 得到 |
+| --- | --- |
+| `cb` | 代码块（按 Tab 选语言） |
+| `cbt` | 带文件名和行号的代码块 |
+| `ic` | 行内代码 |
+| `admon` | 提示框 |
+| `tabs` | 标签页 |
+| `mmd` | Mermaid 图 |
+| `tbl` | 表格 |
+
+> 如果按 Tab 没反应，检查 VS Code 设置里的 `editor.tabCompletion` 是否为 `on`（默认是）。
 
 ## 六、博客怎么写
 

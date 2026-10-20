@@ -1,0 +1,74 @@
+{
+  "代码块（选语言）": {
+    "prefix": "cb",
+    "body": [
+      "```${1|bash,js,jsx,ts,tsx,json,yaml,html,css,python,sql,md,diff|}",
+      "$0",
+      "```"
+    ],
+    "description": "插入代码块，按 Tab 选择语言"
+  },
+  "代码块（带文件名和行号）": {
+    "prefix": "cbt",
+    "body": [
+      "```${1|bash,js,jsx,ts,tsx,json,yaml,html,css,python,sql|} title=\"${2:文件名}\" showLineNumbers",
+      "$0",
+      "```"
+    ],
+    "description": "插入带标题的代码块"
+  },
+  "行内代码": {
+    "prefix": "ic",
+    "body": ["`${1:代码}`"],
+    "description": "插入行内代码"
+  },
+  "提示框": {
+    "prefix": "admon",
+    "body": [
+      "::::${1|tip,note,info,caution,warning,danger|}[${2:标题}]",
+      "",
+      "$0",
+      "",
+      "::::"
+    ],
+    "description": "插入提示框"
+  },
+  "Mermaid 图": {
+    "prefix": "mmd",
+    "body": [
+      "```mermaid",
+      "graph TD",
+      "  A[开始] --> B[结束]",
+      "```"
+    ],
+    "description": "插入 Mermaid 流程图"
+  },
+  "标签页 Tabs": {
+    "prefix": "tabs",
+    "body": [
+      "import Tabs from '@theme/Tabs';",
+      "import TabItem from '@theme/TabItem';",
+      "",
+      "<Tabs>",
+      "  <TabItem value=\"a\" label=\"${1:标签一}\" default>",
+      "",
+      "$0",
+      "",
+      "  </TabItem>",
+      "  <TabItem value=\"b\" label=\"${2:标签二}\">",
+      "",
+      "  </TabItem>",
+      "</Tabs>"
+    ],
+    "description": "插入标签页"
+  },
+  "表格": {
+    "prefix": "tbl",
+    "body": [
+      "| ${1:列一} | ${2:列二} |",
+      "| --- | --- |",
+      "| ${3:内容} | ${4:内容} |"
+    ],
+    "description": "插入表格"
+  }
+}
