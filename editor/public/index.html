@@ -150,9 +150,24 @@
         <button data-ins="link">链接</button>
         <button data-ins="image">图片</button>
       </div>
+      <div id="draftBanner" class="hidden" style="display:flex;gap:10px;align-items:center;padding:8px 16px;background:#2a2416;border-bottom:1px solid #4a3d1a;font-size:13px">
+        <span style="color:#e0a13c">发现上次未保存的本地草稿</span>
+        <button id="btnRestoreDraft">恢复草稿</button>
+        <button id="btnDiscardDraft">忽略</button>
+      </div>
       <div class="split">
         <div class="pane"><textarea id="editor" placeholder="选择左侧文章，或点「新建」开始写作"></textarea></div>
-        <div class="pane"><iframe id="preview" src="about:blank"></iframe></div>
+        <div class="pane" style="position:relative">
+          <iframe id="preview" src="about:blank" onload="document.getElementById('previewMask').style.display='none'"></iframe>
+          <div id="previewMask" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;background:#0f1115;color:#8b93a7;font-size:13px">
+            <span class="loading"></span>
+            <span id="previewMaskText">预览加载中…</span>
+            <div style="display:flex;gap:10px">
+              <button id="btnLoadPreview">加载预览</button>
+              <a id="previewOpen" href="#" target="_blank" style="color:#4f6bed;font-size:12px;align-self:center">在新标签页打开</a>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="status">
         <span id="statusText">就绪</span>
@@ -282,6 +297,8 @@ async function boot() {
 
 /* ---------- 目录树 ---------- */
 let treeQuery = '';
+let previewActive = false;
+let pendingDraft = null;
 function renderTree() {
   const q = treeQuery.trim().toLowerCase();
   const match = (it) => !q || it.title.toLowerCase().includes(q) || it.path.toLowerCase().includes(q);
@@ -334,7 +351,7 @@ $('tree').onclick = async (e) => {
 
 async function openDoc(path, force) {
   if (!force && state.dirty && state.current && state.current.path !== path) {
-    if (!confirm('当前文章还有未保存的修改，确定要切换吗？')) return;
+    if (!window.confirm('当前文章还有未保存的修改，确定要切换吗？')) return;
   }
   $('statusText').innerHTML = '<span class="loading"></span> 加载中…';
   const data = await api('/api/doc?path=' + encodeURIComponent(path));
@@ -342,17 +359,20 @@ async function openDoc(path, force) {
   state.dirty = false;
   let content = data.content;
   const local = localStorage.getItem('yyj-draft:' + path);
-  if (local && local !== content && confirm('发现上次未保存的本地草稿，是否恢复？')) {
-    content = local;
-  }
+  pendingDraft = local && local !== content ? local : null;
+  $('draftBanner').classList.toggle('hidden', !pendingDraft);
   $('editor').value = content;
   $('currentPath').textContent = path;
   $('dirtyFlag').textContent = '';
   $('statusText').textContent = '已加载';
   $('btnPublishDraft').classList.toggle('hidden', !path.startsWith('drafts/'));
   renderTree();
-  startPreview();
-  setTimeout(() => updatePreview(0), 800);
+  previewActive = false;
+  $('preview').src = 'about:blank';
+  previewActive = true;
+  $('previewMask').style.display = 'flex';
+  $('previewMaskText').textContent = '点「加载预览」查看真实效果（首次编译较慢）';
+  $('previewOpen').href = `http://${location.hostname}:${DEV_PORT}/YYJ-wiki${routeOf(path)}`;
 }
 
 /* ---------- 编辑器 ---------- */
@@ -361,6 +381,7 @@ $('editor').oninput = () => {
   state.dirty = true;
   $('dirtyFlag').textContent = '未保存';
   clearTimeout(autosaveTimer);
+  if (previewActive) setTimeout(() => { if (state.current) updatePreview(); }, 1500);
   autosaveTimer = setTimeout(() => {
     if (state.current) localStorage.setItem('yyj-draft:' + state.current.path, $('editor').value);
   }, 800);
@@ -419,6 +440,20 @@ $('imgFile').onchange = () => {
   reader.readAsDataURL(file);
 };
 
+$('btnRestoreDraft').onclick = () => {
+  if (!pendingDraft) return;
+  $('editor').value = pendingDraft;
+  state.dirty = true;
+  $('dirtyFlag').textContent = '未保存';
+  $('draftBanner').classList.add('hidden');
+  toast('已恢复本地草稿，记得保存');
+};
+$('btnDiscardDraft').onclick = () => {
+  if (state.current) localStorage.removeItem('yyj-draft:' + state.current.path);
+  pendingDraft = null;
+  $('draftBanner').classList.add('hidden');
+};
+
 /* ---------- 保存 / 预览 ---------- */
 $('btnSave').onclick = async () => {
   if (!state.current) return;
@@ -453,6 +488,9 @@ function updatePreview(retry) {
   if (!state.current) return;
   const route = routeOf(state.current.path);
   const url = `http://${location.hostname}:${DEV_PORT}/YYJ-wiki${route}?t=${Date.now()}`;
+  $('previewMask').style.display = 'flex';
+  $('previewMaskText').textContent = '预览加载中…（开发服务器首次编译较慢）';
+  $('previewOpen').href = url;
   $('preview').src = url;
   // 新建文章时开发服务器可能还没注册路由，稍后自动重试
   if (typeof retry === 'number' && retry > 0) {
@@ -460,7 +498,8 @@ function updatePreview(retry) {
   }
 }
 
-$('btnRefreshPreview').onclick = () => { updatePreview(1); toast('正在刷新预览'); };
+$('btnRefreshPreview').onclick = () => { previewActive = true; updatePreview(1); toast('正在刷新预览'); };
+$('btnLoadPreview').onclick = () => { previewActive = true; startPreview(); };
 
 $('btnPreviewDev').onclick = () => {
   window.open(`http://${location.hostname}:${DEV_PORT}/YYJ-wiki/`, '_blank');

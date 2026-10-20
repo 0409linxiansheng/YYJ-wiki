@@ -246,7 +246,7 @@ const server = http.createServer(async (req, res) => {
       if (fs.existsSync(file) && fs.statSync(file).isFile()) {
         const ext = path.extname(file);
         const type = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8'}[ext] || 'application/octet-stream';
-        res.writeHead(200, {'Content-Type': type});
+        res.writeHead(200, {'Content-Type': type, 'Cache-Control': 'no-store, must-revalidate'});
         res.end(fs.readFileSync(file));
         return;
       }
