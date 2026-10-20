@@ -596,15 +596,27 @@ $('btnAssets').onclick = async () => {
       <div style="flex:1"><div>${a.name}</div>
         <small>${(a.size / 1024).toFixed(0)} KB · ${a.refs ? '被引用 ' + a.refs + ' 次' : '⚠ 未被引用'}</small></div>
       <button data-copy="${a.url}">复制路径</button>
+      <button class="danger" data-rm="${a.name}" data-refs="${a.refs}">删除</button>
     </div>`).join('') || '<div class="empty">暂无图片</div>';
   $('modalAssets').classList.remove('hidden');
 };
 $('btnAssetsClose').onclick = () => $('modalAssets').classList.add('hidden');
-$('assetsList').onclick = (e) => {
+$('assetsList').onclick = async (e) => {
   const c = e.target.closest('[data-copy]');
-  if (!c) return;
-  navigator.clipboard.writeText(c.dataset.copy);
-  status('已复制 ' + c.dataset.copy, 'ok');
+  if (c) {
+    navigator.clipboard.writeText(c.dataset.copy);
+    status('已复制 ' + c.dataset.copy, 'ok');
+    return;
+  }
+  const rm = e.target.closest('[data-rm]');
+  if (!rm) return;
+  const refs = Number(rm.dataset.refs);
+  const msg = refs > 0 ? `这张图仍被引用 ${refs} 次，删除后相关文章会显示裂图。确定删除？` : '确认删除这张图片？';
+  if (!confirm(msg)) return;
+  const data = await api('/api/assets/delete', {method: 'POST', body: JSON.stringify({name: rm.dataset.rm, force: refs > 0})});
+  if (!data.ok) { status('删除失败：' + (data.error || ''), 'err'); return; }
+  status('已删除 ' + rm.dataset.rm, 'ok');
+  $('btnAssets').click();
 };
 
 /* ---------- 单文件历史 ---------- */

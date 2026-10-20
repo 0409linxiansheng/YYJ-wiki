@@ -491,6 +491,18 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, list);
     }
 
+    if (p === '/api/assets/delete' && req.method === 'POST') {
+      const {name, force} = await readBody(req);
+      if (!name || /[\\/]/.test(name)) return json(res, 400, {error: '非法文件名'});
+      const file = path.join(SITE_DIR, 'static', 'img', name);
+      if (!fs.existsSync(file)) return json(res, 404, {error: '文件不存在'});
+      const refs = ['docs', 'blog', 'src'].flatMap((d) => collectText(path.join(SITE_DIR, d))).join('\n');
+      const count = (refs.match(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+      if (count > 0 && !force) return json(res, 409, {error: `仍被引用 ${count} 次，先移除引用`, refs: count});
+      fs.unlinkSync(file);
+      return json(res, 200, {ok: true});
+    }
+
     /* --- 图片上传 --- */
     if (p === '/api/upload' && req.method === 'POST') {
       const {filename, data} = await readBody(req);
