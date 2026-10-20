@@ -188,6 +188,7 @@
         <span style="color:var(--muted)" id="currentPath">未选择文章</span>
         <button id="btnPublishDraft" class="hidden">发布这篇草稿</button>
         <button id="btnFileHistory">本文历史</button>
+        <button id="btnRealRender">真实渲染</button>
         <button id="btnMode">切换源码</button>
         <button id="btnRefreshPreview">刷新预览</button>
         <button id="btnRename" style="margin-left:auto">重命名</button>
@@ -295,6 +296,11 @@
   <div style="text-align:right;margin-top:12px"><button id="btnFileHistoryClose">关闭</button></div>
 </div></div>
 
+<div id="renderPane" class="hidden" style="position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:60;display:flex;padding:36px">
+  <div style="flex:1;background:#fff;border-radius:12px;overflow:auto;position:relative" id="renderHost">
+    <button id="btnRenderClose" style="position:sticky;top:10px;float:right;margin:10px;z-index:2">关闭</button>
+  </div>
+</div>
 <div id="toasts"></div>
 <script>
 const DEV_PORT = 3001;
@@ -520,6 +526,22 @@ $('btnDiscardDraft').onclick = () => {
   pendingDraft = null;
   $('draftBanner').classList.add('hidden');
 };
+
+/* ---------- 真实渲染（用前端渲染器输出） ---------- */
+$('btnRealRender').onclick = async () => {
+  if (!state.current) { toast('先打开一篇文章', 'err'); return; }
+  toast('正在用前端渲染器渲染…');
+  const data = await api('/api/render?path=' + encodeURIComponent(state.current.path));
+  if (!data.ok || !data.html) { toast('渲染失败：确认开发服务器（3001）在运行', 'err'); return; }
+  const host = $('renderHost');
+  const shadow = host.shadowRoot || host.attachShadow({mode: 'open'});
+  shadow.innerHTML = '<link rel="stylesheet" href="/site-css">'
+    + '<style>.wrap{max-width:760px;margin:0 auto;padding:28px 32px 80px}</style>'
+    + '<div class="markdown wrap">' + data.html + '</div>';
+  $('renderPane').classList.remove('hidden');
+  toast('渲染完成（与线上一致）');
+};
+$('btnRenderClose').onclick = () => $('renderPane').classList.add('hidden');
 
 /* ---------- 目录 ---------- */
 function renderToc() {

@@ -399,6 +399,24 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {ok: true, path: target});
     }
 
+    /* --- 用前端渲染器渲染当前文档，保证与线上完全一致 --- */
+    if (p === '/api/render' && req.method === 'GET') {
+      const rel = url.searchParams.get('path') || '';
+      const item = [...listDocs(), ...listBlog()].find((d) => d.path === rel);
+      if (!item) return json(res, 404, {error: '找不到文章路由'});
+      const html = await new Promise((resolve) => {
+        const req2 = http.get(`http://127.0.0.1:3001/YYJ-wiki${item.route}`, (r) => {
+          let buf = '';
+          r.on('data', (c) => { buf += c; });
+          r.on('end', () => resolve(buf));
+        });
+        req2.on('error', () => resolve(''));
+        req2.setTimeout(15000, () => { req2.destroy(); resolve(''); });
+      });
+      const m = html.match(/<article[^>]*class="[^"]*markdown[^"]*"[^>]*>([\s\S]*?)<\/article>/);
+      return json(res, 200, {ok: !!m, route: item.route, html: m ? m[1] : ''});
+    }
+
     /* --- 站点设置 --- */
     if (p === '/api/settings' && req.method === 'GET') {
       return json(res, 200, readJson(SITE_CONFIG, {}));
