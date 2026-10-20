@@ -60,6 +60,16 @@
   .hist-item { padding:10px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; display:flex; gap:10px; align-items:center; }
   .hist-item small { color:var(--muted); }
   .empty { color:var(--muted); text-align:center; padding:40px; }
+  @media (max-width: 820px) {
+    main { flex-direction: column; }
+    aside { width:100%; max-height:28vh; border-right:none; border-bottom:1px solid var(--line); }
+    .split { flex-direction:column; }
+    .split .pane + .pane { border-left:none; border-top:1px solid var(--line); }
+    header { flex-wrap:wrap; }
+    .toolbar { overflow-x:auto; flex-wrap:nowrap; }
+    .modal .row { flex-direction:column; }
+    .modal .row label { width:auto; }
+  }
   .tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
   .tabs button.active { background:var(--brand); border-color:var(--brand); color:#fff; }
   .list-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
@@ -95,6 +105,7 @@
     <section class="editor">
       <div class="meta">
         <span style="color:var(--muted)" id="currentPath">未选择文章</span>
+        <button id="btnPublishDraft" class="hidden">发布这篇草稿</button>
         <button id="btnRename" style="margin-left:auto">重命名</button>
         <button id="btnPreviewDev">打开开发服务器</button>
       </div>
@@ -135,6 +146,7 @@
   <div class="row" id="rowCategory"><label>分类</label><select id="newCategory"></select></div>
   <div class="row"><label>标题</label><input id="newTitle" placeholder="文章标题" /></div>
   <div class="row"><label>文件名</label><input id="newSlug" placeholder="留空自动生成" /></div>
+  <div class="row" id="rowDraft"><label>草稿</label><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="newDraft"> 先存为草稿，不发布</label></div>
   <div style="text-align:right"><button id="btnNewCancel">取消</button> <button class="primary" id="btnNewOk">创建</button></div>
 </div></div>
 
@@ -167,7 +179,7 @@
 
 <script>
 const DEV_PORT = 3001;
-const state = {docs: [], blog: [], categories: {}, current: null, dirty: false};
+const state = {docs: [], blog: [], drafts: [], categories: {}, current: null, dirty: false};
 const $ = (id) => document.getElementById(id);
 
 async function api(path, opts = {}) {
@@ -209,7 +221,7 @@ async function boot() {
   const data = await api('/api/state');
   if (data.needsSetup) return showLogin(true);
   if (!data.authed) return showLogin(false);
-  state.docs = data.docs; state.blog = data.blog; state.categories = data.categories || {};
+  state.docs = data.docs; state.blog = data.blog; state.drafts = data.drafts || []; state.categories = data.categories || {};
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
   renderTree();
@@ -231,6 +243,14 @@ function renderTree() {
     }
     html += '</div>';
   }
+  if (state.drafts.length) {
+    html += `<div class="group"><div class="title">草稿（未发布）</div>`;
+    for (const it of state.drafts) {
+      html += `<div class="item ${state.current?.path === it.path ? 'active' : ''}" data-path="${it.path}" data-kind="draft">
+        <span>${it.title}</span><span class="del" data-del="${it.path}">✕</span></div>`;
+    }
+    html += '</div>';
+  }
   if (state.blog.length) {
     html += `<div class="group"><div class="title">博客</div>`;
     for (const it of state.blog) {
@@ -248,7 +268,7 @@ $('tree').onclick = async (e) => {
     if (!confirm('确定删除这篇文章？（发布后才会真正删除线上）')) return;
     await api('/api/doc/delete', {method: 'POST', body: JSON.stringify({path: del.dataset.del})});
     const data = await api('/api/state');
-    state.docs = data.docs; state.blog = data.blog; state.categories = data.categories || {}; renderTree();
+    state.docs = data.docs; state.blog = data.blog; state.drafts = data.drafts || []; state.categories = data.categories || {}; renderTree();
     return;
   }
   const item = e.target.closest('[data-path]');
@@ -264,6 +284,7 @@ async function openDoc(path) {
   $('currentPath').textContent = path;
   $('dirtyFlag').textContent = '';
   $('statusText').textContent = '已加载';
+  $('btnPublishDraft').classList.toggle('hidden', !path.startsWith('drafts/'));
   renderTree();
   startPreview();
 }
@@ -381,14 +402,31 @@ $('btnNewOk').onclick = async () => {
   const title = $('newTitle').value.trim();
   if (!title) return;
   const data = await api('/api/doc/create', {method: 'POST', body: JSON.stringify({
-    kind, category: $('newCategory').value, title, slug: $('newSlug').value.trim(),
+    kind, draft: $('newDraft').checked, category: $('newCategory').value, title, slug: $('newSlug').value.trim(),
   })});
   $('modalNew').classList.add('hidden');
-  $('newTitle').value = ''; $('newSlug').value = '';
+  $('newTitle').value = ''; $('newSlug').value = ''; $('newDraft').checked = false;
   const s = await api('/api/state');
-  state.docs = s.docs; state.blog = s.blog;
+  state.docs = s.docs; state.blog = s.blog; state.drafts = s.drafts || [];
   renderTree(); fillCategories();
   if (data.path) await openDoc(data.path);
+};
+
+$('btnPublishDraft').onclick = async () => {
+  if (!state.current) return;
+  const cats = Object.entries(state.categories);
+  const options = cats.map(([slug, c], i) => `${i + 1}. ${c.label}`).join('\n');
+  const pick = prompt(`发布到哪个分类？\n\n${options}\n\n输入序号：`, '1');
+  const idx = Number(pick) - 1;
+  if (!(idx >= 0 && idx < cats.length)) return;
+  const category = cats[idx][0];
+  const data = await api('/api/doc/publish-draft', {method: 'POST', body: JSON.stringify({path: state.current.path, category})});
+  if (!data.ok) { status('发布失败：' + (data.error || ''), 'err'); return; }
+  const s = await api('/api/state');
+  state.docs = s.docs; state.blog = s.blog; state.drafts = s.drafts || [];
+  renderTree();
+  await openDoc(data.path);
+  status('草稿已转为正式文章，记得点「发布到 GitHub」', 'ok');
 };
 
 /* ---------- 发布 ---------- */

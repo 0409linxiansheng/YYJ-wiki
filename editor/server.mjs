@@ -199,6 +199,22 @@ function listBlog() {
   return items.sort((a, b) => (a.name < b.name ? 1 : -1));
 }
 
+function listDrafts() {
+  const dir = path.join(SITE_DIR, 'drafts');
+  return walk(dir).map((file) => {
+    const rel = path.relative(SITE_DIR, file).split(path.sep).join('/');
+    const fm = frontMatter(fs.readFileSync(file, 'utf8'));
+    return {
+      kind: 'draft',
+      path: rel,
+      category: 'drafts',
+      name: path.basename(file).replace(/\.mdx?$/, ''),
+      title: fm.title || path.basename(file),
+      route: null,
+    };
+  }).sort((a, b) => a.path.localeCompare(b.path));
+}
+
 function slugify(text) {
   return text
     .trim()
@@ -238,6 +254,7 @@ const server = http.createServer(async (req, res) => {
         categories: config.categories ?? {},
         docs: authed ? listDocs() : [],
         blog: authed ? listBlog() : [],
+        drafts: authed ? listDrafts() : [],
       });
     }
 
@@ -289,9 +306,17 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/api/doc/create' && req.method === 'POST') {
-      const {kind, category, title, slug} = await readBody(req);
+      const {kind, category, title, slug, draft} = await readBody(req);
       const s = slug || slugify(title || 'untitled');
       let rel;
+      if (draft) {
+        rel = `drafts/${s}.mdx`;
+        const body = `---\ntitle: ${title || s}\ndescription: \n---\n\n在此开始写作。\n`;
+        const file = safePath(rel);
+        fs.mkdirSync(path.dirname(file), {recursive: true});
+        fs.writeFileSync(file, body);
+        return json(res, 200, {ok: true, path: rel});
+      }
       if (kind === 'blog') {
         const date = new Date().toISOString().slice(0, 10);
         rel = `blog/${date}-${s}/index.mdx`;
@@ -325,6 +350,18 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {ok: true});
     }
 
+    if (p === '/api/doc/publish-draft' && req.method === 'POST') {
+      const {path: rel, category} = await readBody(req);
+      if (!category) return json(res, 400, {error: '请选择分类'});
+      const from = safePath(rel);
+      const name = path.basename(rel);
+      const target = `docs/${category}/${name}`;
+      const to = safePath(target);
+      fs.mkdirSync(path.dirname(to), {recursive: true});
+      fs.renameSync(from, to);
+      return json(res, 200, {ok: true, path: target});
+    }
+
     /* --- 站点设置 --- */
     if (p === '/api/settings' && req.method === 'GET') {
       return json(res, 200, readJson(SITE_CONFIG, {}));
@@ -349,7 +386,13 @@ const server = http.createServer(async (req, res) => {
       const commit = await run('git', ['commit', '-m', message || `content: ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`]);
       if (!commit.ok && !/nothing to commit/.test(commit.out)) return json(res, 500, {error: commit.out});
       const push = await run('git', ['push']);
-      return json(res, push.ok ? 200 : 500, {ok: push.ok, output: commit.out + '\n' + push.out});
+      let tag = '';
+      if (push.ok) {
+        tag = 'publish-' + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
+        await run('git', ['tag', tag]);
+        await run('git', ['push', 'origin', tag]);
+      }
+      return json(res, push.ok ? 200 : 500, {ok: push.ok, tag, output: commit.out + '\n' + push.out});
     }
 
     if (p === '/api/history' && req.method === 'GET') {
