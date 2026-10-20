@@ -55,6 +55,9 @@ fi
 
 systemctl daemon-reload
 systemctl enable yyj-editor
+# 关掉手动启动的实例，避免端口冲突
+pkill -f "editor/server.mjs" 2>/dev/null || true
+sleep 1
 systemctl restart yyj-editor
 sleep 2
 systemctl status yyj-editor --no-pager -l | head -12
