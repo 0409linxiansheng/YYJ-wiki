@@ -60,6 +60,14 @@
   .hist-item { padding:10px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; display:flex; gap:10px; align-items:center; }
   .hist-item small { color:var(--muted); }
   .empty { color:var(--muted); text-align:center; padding:40px; }
+  .tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+  .tabs button.active { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .list-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+  .list-row input { flex:1; }
+  .field { margin-bottom:12px; }
+  .field label { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+  .field input, .field textarea { width:100%; }
+  .field textarea { height:140px; }
 </style>
 </head>
 <body>
@@ -112,7 +120,8 @@
       </div>
       <div class="status">
         <span id="statusText">就绪</span>
-        <span style="margin-left:auto" id="dirtyFlag"></span>
+        <label style="display:flex;align-items:center;gap:6px;margin-left:auto"><input type="checkbox" id="chkBuild"> 发布前构建校验</label>
+        <span id="dirtyFlag"></span>
         <button id="btnSave">保存</button>
       </div>
     </section>
@@ -137,12 +146,24 @@
 </div></div>
 
 <!-- 设置 -->
-<div class="modal hidden" id="modalSettings"><div class="box">
-  <h2>站点设置（site.config.json）</h2>
-  <p style="color:var(--muted);margin-top:-8px">直接编辑 JSON，保存后需重新构建才会生效。</p>
-  <textarea id="settingsJson"></textarea>
-  <div style="text-align:right;margin-top:12px"><button id="btnSettingsClose">关闭</button> <button class="primary" id="btnSettingsSave">保存</button></div>
+<div class="modal hidden" id="modalSettings"><div class="box" style="width:min(880px,94vw)">
+  <h2>站点设置</h2>
+  <div class="tabs" id="settingsTabs">
+    <button data-tab="basic" class="active">基本信息</button>
+    <button data-tab="nav">导航栏</button>
+    <button data-tab="cat">分类</button>
+    <button data-tab="social">社交</button>
+    <button data-tab="home">首页</button>
+    <button data-tab="footer">页脚</button>
+  </div>
+  <div id="settingsBody" style="min-height:320px"></div>
+  <div style="text-align:right;margin-top:14px">
+    <button id="btnSettingsClose">取消</button>
+    <button class="primary" id="btnSettingsSave">保存</button>
+  </div>
 </div></div>
+
+<input type="file" id="imgFile" accept="image/*" hidden />
 
 <script>
 const DEV_PORT = 3001;
@@ -273,6 +294,7 @@ const SNIPPETS = {
 $('toolbar').onclick = (e) => {
   const btn = e.target.closest('[data-ins]');
   if (!btn) return;
+  if (btn.dataset.ins === 'image') { $('imgFile').click(); return; }
   const ta = $('editor');
   const fn = SNIPPETS[btn.dataset.ins];
   if (!fn) return;
@@ -281,6 +303,28 @@ $('toolbar').onclick = (e) => {
   ta.focus();
   state.dirty = true;
   $('dirtyFlag').textContent = '未保存';
+};
+
+$('imgFile').onchange = () => {
+  const file = $('imgFile').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    status('正在上传图片…');
+    const data = await api('/api/upload', {method: 'POST', body: JSON.stringify({filename: file.name, data: reader.result})});
+    if (data.url) {
+      const ta = $('editor');
+      ta.setRangeText(`![${file.name}](${data.url})`, ta.selectionStart, ta.selectionEnd, 'end');
+      ta.focus();
+      status('图片已上传并插入', 'ok');
+      state.dirty = true;
+      $('dirtyFlag').textContent = '未保存';
+    } else {
+      status('上传失败：' + (data.error || ''), 'err');
+    }
+    $('imgFile').value = '';
+  };
+  reader.readAsDataURL(file);
 };
 
 /* ---------- 保存 / 预览 ---------- */
@@ -353,6 +397,11 @@ $('btnPublish').onclick = async () => {
   if (!st.files.length) { status('没有需要发布的改动', 'ok'); return; }
   const list = st.files.map((f) => `${f.status} ${f.path}`).join('\n');
   if (!confirm(`将发布以下 ${st.files.length} 个文件：\n\n${list}\n\n确认推送？`)) return;
+  if ($('chkBuild').checked) {
+    status('正在构建校验（约 1 分钟）…');
+    const b = await api('/api/build', {method: 'POST'});
+    if (!b.ok) { status('构建失败，已阻止发布', 'err'); alert((b.output || '').slice(-1500)); return; }
+  }
   status('正在推送…');
   const data = await api('/api/publish', {method: 'POST', body: JSON.stringify({})});
   status(data.ok ? '已推送，约 2 分钟后上线' : '推送失败：' + (data.error || data.output), data.ok ? 'ok' : 'err');
@@ -385,22 +434,104 @@ $('historyList').onclick = async (e) => {
   }
 };
 
-/* ---------- 设置 ---------- */
+/* ---------- 设置（表单） ---------- */
+let cfg = null, settingsTab = 'basic';
+const esc = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+
 $('btnSettings').onclick = async () => {
-  const cfg = await api('/api/settings');
-  $('settingsJson').value = JSON.stringify(cfg, null, 2);
+  cfg = await api('/api/settings');
+  settingsTab = 'basic';
+  [...$('settingsTabs').children].forEach((el) => el.classList.toggle('active', el.dataset.tab === 'basic'));
   $('modalSettings').classList.remove('hidden');
+  renderSettings();
 };
 $('btnSettingsClose').onclick = () => $('modalSettings').classList.add('hidden');
-$('btnSettingsSave').onclick = async () => {
-  try {
-    const cfg = JSON.parse($('settingsJson').value);
-    await api('/api/settings', {method: 'POST', body: JSON.stringify(cfg)});
-    status('站点配置已保存，发布后生效', 'ok');
-    $('modalSettings').classList.add('hidden');
-  } catch (err) {
-    alert('JSON 格式错误：' + err.message);
+$('settingsTabs').onclick = (e) => {
+  const b = e.target.closest('[data-tab]');
+  if (!b) return;
+  settingsTab = b.dataset.tab;
+  [...$('settingsTabs').children].forEach((el) => el.classList.toggle('active', el === b));
+  renderSettings();
+};
+
+function field(label, key, value, ph) {
+  return `<div class="field"><label>${label}</label><input data-k="${key}" value="${esc(value)}" placeholder="${esc(ph || '')}"></div>`;
+}
+
+function renderSettings() {
+  const b = $('settingsBody');
+  if (settingsTab === 'basic') {
+    b.innerHTML =
+      field('站名', 'title', cfg.title) +
+      field('标语', 'tagline', cfg.tagline) +
+      field('Logo 路径', 'logo', cfg.logo, '/img/logo.svg') +
+      field('Favicon 路径', 'favicon', cfg.favicon, '/img/favicon.svg') +
+      field('主色', 'primary', cfg.theme && cfg.theme.primary, '#3b5bdb') +
+      field('SEO 描述', 'seoDescription', cfg.seo && cfg.seo.description);
+  } else if (settingsTab === 'nav') {
+    b.innerHTML = ((cfg.navbar || []).map((it, i) => `
+      <div class="list-row">
+        <input data-nav="${i}" data-f="label" value="${esc(it.label)}" placeholder="名称">
+        <input data-nav="${i}" data-f="link" value="${esc(it.to || it.href || '')}" placeholder="/路径 或 https://">
+        <button data-del-nav="${i}">✕</button>
+      </div>`).join('') || '<div class="empty">还没有导航项</div>') +
+      '<button id="addNav">+ 添加导航项</button>';
+  } else if (settingsTab === 'cat') {
+    b.innerHTML = Object.entries(cfg.categories || {}).map(([slug, c]) => `
+      <div class="list-row" data-cat="${slug}">
+        <span style="width:70px;color:var(--muted)">${slug}</span>
+        <input data-cf="label" value="${esc(c.label)}" placeholder="名称">
+        <input data-cf="desc" value="${esc(c.desc)}" placeholder="描述">
+        <input data-cf="icon" value="${esc(c.icon)}" placeholder="图标" style="max-width:90px">
+      </div>`).join('');
+  } else if (settingsTab === 'social') {
+    b.innerHTML =
+      field('GitHub 仓库', 'github', cfg.social && cfg.social.github) +
+      field('微信二维码', 'wechatQr', cfg.social && cfg.social.wechatQr, '/img/wechat-qr.webp') +
+      field('QQ 二维码', 'qqQr', cfg.social && cfg.social.qqQr, '/img/qq-qr.webp');
+  } else if (settingsTab === 'home') {
+    b.innerHTML = `<div class="field"><label>首页上标</label><input data-k="overline" value="${esc(cfg.home && cfg.home.overline)}"></div>
+      <div class="field"><label>入口卡片（JSON）</label><textarea data-json="cards">${esc(JSON.stringify((cfg.home && cfg.home.cards) || [], null, 2))}</textarea></div>`;
+  } else if (settingsTab === 'footer') {
+    b.innerHTML = `<div class="field"><label>页脚区块（JSON）</label><textarea data-json="footer" style="height:320px">${esc(JSON.stringify((cfg.footer && cfg.footer.columns) || [], null, 2))}</textarea></div>`;
   }
+}
+
+$('settingsBody').addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset.k) {
+    const k = t.dataset.k;
+    if (k === 'primary') { cfg.theme = cfg.theme || {}; cfg.theme.primary = t.value; }
+    else if (k === 'overline') { cfg.home = cfg.home || {}; cfg.home.overline = t.value; }
+    else if (k === 'seoDescription') { cfg.seo = cfg.seo || {}; cfg.seo.description = t.value; }
+    else cfg[k] = t.value;
+  }
+  if (t.dataset.nav !== undefined) {
+    const i = Number(t.dataset.nav), it = cfg.navbar[i];
+    if (t.dataset.f === 'label') it.label = t.value;
+    else {
+      const v = t.value;
+      if (/^https?:/.test(v)) { it.href = v; delete it.to; } else { it.to = v; delete it.href; }
+    }
+  }
+  if (t.dataset.cf) {
+    const slug = t.closest('[data-cat]').dataset.cat;
+    cfg.categories[slug][t.dataset.cf] = t.value;
+  }
+  if (t.dataset.json === 'cards') { try { cfg.home = cfg.home || {}; cfg.home.cards = JSON.parse(t.value); } catch {} }
+  if (t.dataset.json === 'footer') { try { cfg.footer = {columns: JSON.parse(t.value)}; } catch {} }
+});
+
+$('settingsBody').addEventListener('click', (e) => {
+  const del = e.target.closest('[data-del-nav]');
+  if (del) { cfg.navbar.splice(Number(del.dataset.delNav), 1); renderSettings(); return; }
+  if (e.target.id === 'addNav') { (cfg.navbar = cfg.navbar || []).push({label: '新导航', to: '/', position: 'left'}); renderSettings(); }
+});
+
+$('btnSettingsSave').onclick = async () => {
+  await api('/api/settings', {method: 'POST', body: JSON.stringify(cfg)});
+  status('站点配置已保存，发布后生效', 'ok');
+  $('modalSettings').classList.add('hidden');
 };
 
 /* ---------- 退出 ---------- */

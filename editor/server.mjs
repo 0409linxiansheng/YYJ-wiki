@@ -111,6 +111,10 @@ function run(cmd, args, opts = {}) {
   });
 }
 
+function npmBin() {
+  return path.join(path.dirname(process.execPath), 'npm');
+}
+
 function portOpen(port) {
   return new Promise((resolve) => {
     const socket = net.connect({port, host: '127.0.0.1'});
@@ -386,11 +390,16 @@ const server = http.createServer(async (req, res) => {
       return json(res, push.ok ? 200 : 500, {ok: push.ok, output: push.out});
     }
 
+    /* --- 构建校验 --- */
+    if (p === '/api/build' && req.method === 'POST') {
+      const r = await run(npmBin(), ['run', 'build'], {timeout: 300000});
+      return json(res, r.ok ? 200 : 500, {ok: r.ok, output: r.out.slice(-4000)});
+    }
+
     /* --- 开发服务器（预览用） --- */
     if (p === '/api/dev/start' && req.method === 'POST') {
       if (await portOpen(3001)) return json(res, 200, {ok: true, running: true});
-      const npmBin = path.join(path.dirname(process.execPath), 'npm');
-      const child = spawn(npmBin, ['start', '--', '--port', '3001', '--host', '0.0.0.0', '--no-open'], {
+      const child = spawn(npmBin(), ['start', '--', '--port', '3001', '--host', '0.0.0.0', '--no-open'], {
         cwd: SITE_DIR,
         detached: true,
         stdio: 'ignore',
