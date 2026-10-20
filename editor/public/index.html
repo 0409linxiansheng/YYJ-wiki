@@ -60,6 +60,23 @@
   .hist-item { padding:10px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; display:flex; gap:10px; align-items:center; }
   .hist-item small { color:var(--muted); }
   .empty { color:var(--muted); text-align:center; padding:40px; }
+  /* 提示条 */
+  #toasts { position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:8px; z-index:99; }
+  .toast { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--brand); padding:10px 14px; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.4); min-width:200px; max-width:360px; font-size:13px; animation:toastIn .18s ease; }
+  .toast.ok { border-left-color:var(--ok); } .toast.err { border-left-color:var(--err); }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px); } }
+  /* 搜索框 */
+  #treeSearch { width:100%; margin-bottom:10px; }
+  /* 侧栏层级 */
+  .group > .title { display:flex; justify-content:space-between; align-items:center; }
+  .group > .title .count { color:var(--muted); font-size:11px; }
+  .item.active { box-shadow:inset 3px 0 0 var(--brand); }
+  .item .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* 工具栏分组 */
+  .toolbar .sep { width:1px; background:var(--line); margin:2px 4px; align-self:stretch; }
+  /* 加载 */
+  .loading { display:inline-block; width:12px; height:12px; border:2px solid var(--line); border-top-color:var(--brand); border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   @media (max-width: 820px) {
     main { flex-direction: column; }
     aside { width:100%; max-height:28vh; border-right:none; border-bottom:1px solid var(--line); }
@@ -102,7 +119,10 @@
     <button class="primary" id="btnPublish">发布到 GitHub</button>
   </header>
   <main>
-    <aside id="tree"></aside>
+    <aside>
+      <input id="treeSearch" placeholder="搜索文章…" />
+      <div id="tree"></div>
+    </aside>
     <section class="editor">
       <div class="meta">
         <span style="color:var(--muted)" id="currentPath">未选择文章</span>
@@ -112,11 +132,12 @@
         <button id="btnPreviewDev">打开开发服务器</button>
       </div>
       <div class="toolbar" id="toolbar">
-        <button data-ins="h2">标题</button>
+        <button data-ins="h2" title="插入二级标题">标题</button>
         <button data-ins="bold"><b>B</b></button>
         <button data-ins="italic"><i>I</i></button>
         <button data-ins="code">行内代码</button>
         <button data-ins="codeblock">代码块</button>
+        <span class="sep"></span>
         <button data-ins="table">表格</button>
         <button data-ins="tip">提示框</button>
         <button data-ins="tabs">标签页</button>
@@ -124,6 +145,7 @@
         <button data-ins="math">公式</button>
         <button data-ins="footnote">脚注</button>
         <button data-ins="details">折叠块</button>
+        <span class="sep"></span>
         <button data-ins="link">链接</button>
         <button data-ins="image">图片</button>
       </div>
@@ -191,6 +213,7 @@
   <div style="text-align:right;margin-top:12px"><button id="btnFileHistoryClose">关闭</button></div>
 </div></div>
 
+<div id="toasts"></div>
 <script>
 const DEV_PORT = 3001;
 const state = {docs: [], blog: [], drafts: [], categories: {}, current: null, dirty: false};
@@ -211,6 +234,18 @@ function status(text, kind) {
   const el = $('statusText');
   el.textContent = text;
   el.className = kind || '';
+}
+
+function toast(message, kind) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (kind || 'ok');
+  el.textContent = message;
+  $('toasts').appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .2s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 220);
+  }, 2600);
 }
 
 /* ---------- 登录 ---------- */
@@ -245,13 +280,16 @@ async function boot() {
 }
 
 /* ---------- 目录树 ---------- */
+let treeQuery = '';
 function renderTree() {
+  const q = treeQuery.trim().toLowerCase();
+  const match = (it) => !q || it.title.toLowerCase().includes(q) || it.path.toLowerCase().includes(q);
   const groups = {};
-  for (const d of state.docs) (groups[d.category] ||= []).push(d);
+  for (const d of state.docs) if (match(d)) (groups[d.category] ||= []).push(d);
   let html = '';
   for (const [cat, items] of Object.entries(groups)) {
     const label = state.categories[cat]?.label || cat;
-    html += `<div class="group"><div class="title">${label}</div>`;
+    html += `<div class="group"><div class="title"><span>${label}</span><span class="count">${items.length}</span></div>`;
     for (const it of items) {
       html += `<div class="item ${state.current?.path === it.path ? 'active' : ''}" data-path="${it.path}" data-kind="doc">
         <span>${it.title}</span><span class="del" data-del="${it.path}">✕</span></div>`;
@@ -261,6 +299,7 @@ function renderTree() {
   if (state.drafts.length) {
     html += `<div class="group"><div class="title">草稿（未发布）</div>`;
     for (const it of state.drafts) {
+      if (!match(it)) continue;
       html += `<div class="item ${state.current?.path === it.path ? 'active' : ''}" data-path="${it.path}" data-kind="draft">
         <span>${it.title}</span><span class="del" data-del="${it.path}">✕</span></div>`;
     }
@@ -269,6 +308,7 @@ function renderTree() {
   if (state.blog.length) {
     html += `<div class="group"><div class="title">博客</div>`;
     for (const it of state.blog) {
+      if (!match(it)) continue;
       html += `<div class="item ${state.current?.path === it.path ? 'active' : ''}" data-path="${it.path}" data-kind="blog">
         <span>${it.title}</span><span class="del" data-del="${it.path}">✕</span></div>`;
     }
@@ -291,11 +331,20 @@ $('tree').onclick = async (e) => {
   await openDoc(item.dataset.path);
 };
 
-async function openDoc(path) {
+async function openDoc(path, force) {
+  if (!force && state.dirty && state.current && state.current.path !== path) {
+    if (!confirm('当前文章还有未保存的修改，确定要切换吗？')) return;
+  }
+  $('statusText').innerHTML = '<span class="loading"></span> 加载中…';
   const data = await api('/api/doc?path=' + encodeURIComponent(path));
   state.current = {path, content: data.content};
   state.dirty = false;
-  $('editor').value = data.content;
+  let content = data.content;
+  const local = localStorage.getItem('yyj-draft:' + path);
+  if (local && local !== content && confirm('发现上次未保存的本地草稿，是否恢复？')) {
+    content = local;
+  }
+  $('editor').value = content;
   $('currentPath').textContent = path;
   $('dirtyFlag').textContent = '';
   $('statusText').textContent = '已加载';
@@ -305,9 +354,14 @@ async function openDoc(path) {
 }
 
 /* ---------- 编辑器 ---------- */
+let autosaveTimer = null;
 $('editor').oninput = () => {
   state.dirty = true;
   $('dirtyFlag').textContent = '未保存';
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    if (state.current) localStorage.setItem('yyj-draft:' + state.current.path, $('editor').value);
+  }, 800);
 };
 
 const SNIPPETS = {
@@ -368,8 +422,9 @@ $('btnSave').onclick = async () => {
   if (!state.current) return;
   await api('/api/doc/save', {method: 'POST', body: JSON.stringify({path: state.current.path, content: $('editor').value})});
   state.dirty = false;
+  if (state.current) localStorage.removeItem('yyj-draft:' + state.current.path);
   $('dirtyFlag').textContent = '已保存';
-  status('已保存到本地文件', 'ok');
+  toast('已保存');
   updatePreview();
 };
 
@@ -402,11 +457,24 @@ $('btnPreviewDev').onclick = () => {
   window.open(`http://${location.hostname}:${DEV_PORT}/YYJ-wiki/`, '_blank');
 };
 
+document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); $('btnSave').click(); }
+  if (mod && e.key === 'Enter') { e.preventDefault(); $('btnPublish').click(); }
+  if (mod && e.key.toLowerCase() === 'k') { e.preventDefault(); $('treeSearch').focus(); }
+});
+
 /* ---------- 新建 ---------- */
 function fillCategories() {
-  const cats = [...new Set(state.docs.map((d) => d.category))];
-  $('newCategory').innerHTML = cats.map((c) => `<option value="${c}">${c}</option>`).join('');
+  const cats = Object.keys(state.categories).length
+    ? Object.keys(state.categories)
+    : [...new Set(state.docs.map((d) => d.category))];
+  $('newCategory').innerHTML = cats
+    .map((c) => `<option value="${c}">${state.categories[c]?.label || c}</option>`)
+    .join('');
 }
+
+$('treeSearch').oninput = (e) => { treeQuery = e.target.value; renderTree(); };
 
 $('btnNew').onclick = () => { $('modalNew').classList.remove('hidden'); $('newTitle').focus(); };
 $('btnNewCancel').onclick = () => $('modalNew').classList.add('hidden');
@@ -457,7 +525,8 @@ $('btnPublish').onclick = async () => {
   }
   status('正在推送…');
   const data = await api('/api/publish', {method: 'POST', body: JSON.stringify({})});
-  status(data.ok ? '已推送，约 2 分钟后上线' : '推送失败：' + (data.error || data.output), data.ok ? 'ok' : 'err');
+  toast(data.ok ? '已推送，约 2 分钟后上线' : '推送失败：' + (data.error || data.output), data.ok ? 'ok' : 'err');
+  status(data.ok ? '已推送，约 2 分钟后上线' : '推送失败', data.ok ? 'ok' : 'err');
 };
 
 /* ---------- 历史 ---------- */
