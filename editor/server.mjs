@@ -261,6 +261,24 @@ const server = http.createServer(async (req, res) => {
       return res.end(css || '/* 还没有构建产物，先运行 npm run build */');
     }
 
+    if (p === '/api/theme' && req.method === 'GET') {
+      const cssDir = path.join(SITE_DIR, 'build', 'assets', 'css');
+      const css = fs.existsSync(cssDir)
+        ? fs.readdirSync(cssDir).filter((f) => f.endsWith('.css')).map((f) => fs.readFileSync(path.join(cssDir, f), 'utf8')).join('\n')
+        : '';
+      const pick = (prefix) => {
+        const m = css.match(new RegExp('\\.' + prefix + '_([A-Za-z0-9_-]{3,10})(?![A-Za-z0-9_-])'));
+        return m ? m[0].slice(1) : '';
+      };
+      return json(res, 200, {
+        admonition: pick('admonition'),
+        admonitionHeading: pick('admonitionHeading'),
+        admonitionIcon: pick('admonitionIcon'),
+        admonitionContent: pick('admonitionContent'),
+        codeBlockLines: pick('codeBlockLines'),
+      });
+    }
+
     /* --- 初始化 / 登录 --- */
     if (p === '/api/state' && req.method === 'GET') {
       const settings = loadSettings();

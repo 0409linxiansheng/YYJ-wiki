@@ -3,7 +3,20 @@
    每个块是一个独立的可编辑单元，块级组件按站点真实样式渲染。 */
 (function () {
   const B = () => window.Blocks;
-  let state = null, hooks = null, blocks = [], fm = null, renderTimer = null;
+  let state = null, hooks = null, blocks = [], fm = null, renderTimer = null, root = null, theme = {};
+
+  function collectBeCss() {
+    let out = '';
+    for (const sheet of document.styleSheets) {
+      let rules;
+      try { rules = sheet.cssRules; } catch { continue; }
+      if (!rules) continue;
+      for (const rule of rules) {
+        if (rule.cssText && rule.cssText.includes('.be-')) out += rule.cssText + '\n';
+      }
+    }
+    return out;
+  }
 
   const el = (tag, cls, html) => {
     const n = document.createElement(tag);
@@ -65,8 +78,8 @@
       return n;
     },
     admonition: (b, i) => {
-      const n = el('div', 'be-block theme-admonition theme-admonition-' + b.kind + ' alert');
-      const head = el('div', 'be-adm-head');
+      const n = el('div', ['be-block', 'theme-admonition', 'theme-admonition-' + b.kind, 'alert', theme.admonition || ''].filter(Boolean).join(' '));
+      const head = el('div', ['be-adm-head', theme.admonitionHeading || ''].filter(Boolean).join(' '));
       const sel = el('select', 'be-adm-kind');
       ['note', 'tip', 'info', 'caution', 'warning', 'danger'].forEach((k) => {
         const o = el('option'); o.value = k; o.textContent = k; sel.appendChild(o);
@@ -76,7 +89,7 @@
       head.appendChild(sel);
       head.appendChild(editText(b.title, 'be-adm-title', (v) => { b.title = v; scheduleSync(); }, '标题'));
       n.appendChild(head);
-      n.appendChild(editText(b.body, 'be-adm-body', (v) => { b.body = v; scheduleSync(); }, '内容'));
+      n.appendChild(editText(b.body, ['be-adm-body', theme.admonitionContent || ''].filter(Boolean).join(' '), (v) => { b.body = v; scheduleSync(); }, '内容'));
       return n;
     },
     table: (b, i) => {
@@ -190,7 +203,7 @@
 
   /* ---------- 主渲染 ---------- */
   function render() {
-    const area = document.getElementById('blockArea');
+    const area = root && root.getElementById ? root.getElementById('blockArea') : document.getElementById('blockArea');
     if (!area) return;
     area.innerHTML = '';
     if (!blocks.length) {
@@ -224,7 +237,17 @@
   window.BlockEditor = {
     mount(container, options) {
       hooks = options;
+      fetch('/api/theme').then((r) => r.json()).then((t) => { theme = t || {}; if (blocks.length) render(); }).catch(() => {});
       container.innerHTML = '';
+      const shadow = container.attachShadow({mode: 'open'});
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/site-css';
+      shadow.appendChild(link);
+      const styleEl = document.createElement('style');
+      styleEl.textContent = collectBeCss();
+      shadow.appendChild(styleEl);
+      root = shadow;
       const bar = el('div', 'be-toolbar');
       const items = [
         ['heading', '标题'], ['paragraph', '正文'], ['code', '代码块'], ['admonition', '提示框'],
@@ -236,8 +259,10 @@
         btn.onclick = () => { blocks.push(NEW_BLOCKS[k]()); render(); scheduleSync(); };
         bar.appendChild(btn);
       });
-      container.appendChild(bar);
-      container.appendChild(el('div', 'be-area', '')).id = 'blockArea';
+      shadow.appendChild(bar);
+      const areaEl = el('div', 'be-area');
+      areaEl.id = 'blockArea';
+      shadow.appendChild(areaEl);
       this.setMarkdown('');
     },
     setMarkdown(md) {
