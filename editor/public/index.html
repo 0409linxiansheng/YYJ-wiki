@@ -128,6 +128,7 @@
         <span style="color:var(--muted)" id="currentPath">未选择文章</span>
         <button id="btnPublishDraft" class="hidden">发布这篇草稿</button>
         <button id="btnFileHistory">本文历史</button>
+        <button id="btnRefreshPreview">刷新预览</button>
         <button id="btnRename" style="margin-left:auto">重命名</button>
         <button id="btnPreviewDev">打开开发服务器</button>
       </div>
@@ -351,6 +352,7 @@ async function openDoc(path, force) {
   $('btnPublishDraft').classList.toggle('hidden', !path.startsWith('drafts/'));
   renderTree();
   startPreview();
+  setTimeout(() => updatePreview(0), 800);
 }
 
 /* ---------- 编辑器 ---------- */
@@ -434,8 +436,9 @@ function routeOf(path) {
     const item = state.blog.find((b) => b.path === path);
     return item ? item.route : '/blog';
   }
-  const item = state.docs.find((d) => d.path === path);
-  return item ? item.route : '/';
+  const parts = path.replace(/^docs\//, '').replace(/\.mdx?$/, '').split('/');
+  const name = parts.pop();
+  return '/' + [...parts, name === 'index' ? '' : name].filter(Boolean).join('/');
 }
 
 async function startPreview() {
@@ -446,12 +449,18 @@ async function startPreview() {
   updatePreview();
 }
 
-function updatePreview() {
+function updatePreview(retry) {
   if (!state.current) return;
   const route = routeOf(state.current.path);
-  const base = '/YYJ-wiki';
-  $('preview').src = `http://${location.hostname}:${DEV_PORT}${base}${route}?t=${Date.now()}`;
+  const url = `http://${location.hostname}:${DEV_PORT}/YYJ-wiki${route}?t=${Date.now()}`;
+  $('preview').src = url;
+  // 新建文章时开发服务器可能还没注册路由，稍后自动重试
+  if (typeof retry === 'number' && retry > 0) {
+    setTimeout(() => { if (state.current) $('preview').src = url + '&r=' + retry; }, 2500);
+  }
 }
+
+$('btnRefreshPreview').onclick = () => { updatePreview(1); toast('正在刷新预览'); };
 
 $('btnPreviewDev').onclick = () => {
   window.open(`http://${location.hostname}:${DEV_PORT}/YYJ-wiki/`, '_blank');
@@ -492,7 +501,7 @@ $('btnNewOk').onclick = async () => {
   const s = await api('/api/state');
   state.docs = s.docs; state.blog = s.blog; state.drafts = s.drafts || [];
   renderTree(); fillCategories();
-  if (data.path) await openDoc(data.path);
+  if (data.path) { await openDoc(data.path, true); setTimeout(() => updatePreview(1), 1200); }
 };
 
 $('btnPublishDraft').onclick = async () => {
