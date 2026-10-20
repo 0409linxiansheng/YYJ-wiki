@@ -345,6 +345,7 @@ async function boot() {
   $('app').classList.remove('hidden');
   renderTree();
   fillCategories();
+  applyMode();
   api('/api/dev/start', {method: 'POST'}).catch(() => {});
   status('已登录 · ' + (data.site.title || ''));
 }
@@ -534,7 +535,9 @@ function applyMode() {
   pane.style.display = blockMode ? 'block' : 'none';
   split.style.display = blockMode ? 'none' : 'flex';
   $('btnMode').textContent = blockMode ? '切换源码' : '切换块编辑';
-  if (blockMode && state.current) mountBlocks() && window.BlockEditor.setMarkdown($('editor').value);
+  if (blockMode && mountBlocks()) {
+    if (state.current) window.BlockEditor.setMarkdown($('editor').value);
+  }
 }
 $('btnMode').onclick = () => { blockMode = !blockMode; applyMode(); };
 
