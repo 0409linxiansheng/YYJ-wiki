@@ -391,35 +391,77 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {ok: true, path: rel});
     }
 
-    /* --- 分类（docs/kb 下的子目录） --- */
-    if (p === '/api/category/create' && req.method === 'POST') {
-      const {slug, title, desc} = await readBody(req);
-      const clean = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-      if (!clean) return json(res, 400, {error: '分类标识只能用小写字母、数字、连字符'});
-      const dir = path.join(SITE_DIR, 'docs', 'kb', clean);
-      if (fs.existsSync(dir)) return json(res, 400, {error: '这个分类已经存在'});
-      fs.mkdirSync(dir, {recursive: true});
-      const body = `---\ntitle: ${title || clean}\ndescription: ${desc || ''}\nsidebar_position: 9\n---\n\n这一类会写什么，一句话说明。\n`;
-      fs.writeFileSync(path.join(dir, 'index.mdx'), body);
-      return json(res, 200, {ok: true, path: `docs/kb/${clean}/index.mdx`});
-    }
-
-    if (p === '/api/category/delete' && req.method === 'POST') {
-      const {slug} = await readBody(req);
-      const clean = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-      if (!clean) return json(res, 400, {error: '缺少分类标识'});
-      const dir = path.join(SITE_DIR, 'docs', 'kb', clean);
-      if (!fs.existsSync(dir)) return json(res, 404, {error: '分类不存在'});
-      fs.rmSync(dir, {recursive: true, force: true});
-      return json(res, 200, {ok: true});
+    /* --- 分类树：docs 下任意层级的目录 --- */
+    function listDirs(rel = '', depth = 0) {
+      const base = path.join(SITE_DIR, 'docs', rel);
+      if (!fs.existsSync(base) || depth > 3) return [];
+      const out = [];
+      for (const name of fs.readdirSync(base)) {
+        if (name.startsWith('_') || name.startsWith('.')) continue;
+        const full = path.join(base, name);
+        if (!fs.statSync(full).isDirectory()) continue;
+        const child = rel ? `${rel}/${name}` : name;
+        const files = fs.readdirSync(full).filter((f) => /\.mdx?$/.test(f));
+        out.push({ path: child, name, depth, articles: files.length });
+        out.push(...listDirs(child, depth + 1));
+      }
+      return out;
     }
 
     if (p === '/api/categories' && req.method === 'GET') {
-      const kbDir = path.join(SITE_DIR, 'docs', 'kb');
-      const list = fs.existsSync(kbDir)
-        ? fs.readdirSync(kbDir).filter((n) => fs.statSync(path.join(kbDir, n)).isDirectory())
-        : [];
-      return json(res, 200, {categories: list});
+      return json(res, 200, {categories: listDirs().map((d) => d.path), tree: listDirs()});
+    }
+
+    if (p === '/api/category/create' && req.method === 'POST') {
+      const {parent, slug, title, desc} = await readBody(req);
+      const cleanParent = String(parent || '').trim().replace(/^\/+|\/+$/g, '');
+      const clean = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      if (!clean) return json(res, 400, {error: '标识只能用小写字母、数字、连字符'});
+      if (cleanParent && !fs.existsSync(path.join(SITE_DIR, 'docs', cleanParent))) {
+        return json(res, 400, {error: `上级目录不存在：docs/${cleanParent}`});
+      }
+      const rel = cleanParent ? `${cleanParent}/${clean}` : clean;
+      const dir = path.join(SITE_DIR, 'docs', rel);
+      if (fs.existsSync(dir)) return json(res, 400, {error: '这个分类已经存在'});
+      fs.mkdirSync(dir, {recursive: true});
+      const name = title || clean;
+      fs.writeFileSync(
+        path.join(dir, 'index.mdx'),
+        `---\ntitle: ${name}\nsidebar_position: 20\n---\n\n${desc || '这个分类会放什么内容。'}\n`,
+      );
+
+      // 一级分类自动进顶部导航
+      if (!cleanParent) {
+        try {
+          const cfgPath = path.join(SITE_DIR, 'site.config.json');
+          const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+          cfg.navbar = cfg.navbar || [];
+          const to = `/${clean}`;
+          if (!cfg.navbar.some((x) => x.to === to)) {
+            cfg.navbar.push({label: name, to, position: 'left'});
+            fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+          }
+        } catch {}
+      }
+
+      return json(res, 200, {ok: true, path: `docs/${rel}/index.mdx`});
+    }
+
+    if (p === '/api/category/delete' && req.method === 'POST') {
+      const {path: rel} = await readBody(req);
+      const clean = String(rel || '').trim().replace(/^\.?\/+|\/+$/g, '');
+      if (!clean) return json(res, 400, {error: '缺少分类路径'});
+      const dir = path.join(SITE_DIR, 'docs', clean);
+      if (!fs.existsSync(dir)) return json(res, 404, {error: '分类不存在'});
+      fs.rmSync(dir, {recursive: true, force: true});
+      try {
+        const cfgPath = path.join(SITE_DIR, 'site.config.json');
+        const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+        const to = `/${clean}`;
+        cfg.navbar = (cfg.navbar || []).filter((x) => x.to !== to);
+        fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+      } catch {}
+      return json(res, 200, {ok: true});
     }
 
     if (p === '/api/doc/delete' && req.method === 'POST') {

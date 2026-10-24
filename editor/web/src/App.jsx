@@ -444,7 +444,8 @@ export default function App() {
           <button
             onClick={async () => {
               const r = await api("/api/categories")
-              setCatPanel({ cats: r.categories ?? [], slug: "", title: "", desc: "", err: "" })
+              const cats = Array.isArray(r.categories) ? r.categories : []
+              setCatPanel({ cats, parent: "", slug: "", title: "", desc: "", err: "" })
             }}>
             分类管理
           </button>
@@ -571,6 +572,11 @@ export default function App() {
             <div style={{ padding: '10px 14px', borderBottom: '1px solid #e4e4e7' }}>
               <div className="cat-form">
                 <input
+                  placeholder="上级目录（留空=一级分类；如 kb）"
+                  value={catPanel.parent || ""}
+                  onChange={(e) => setCatPanel({ ...catPanel, parent: e.target.value, err: "" })}
+                />
+                <input
                   placeholder="英文标识（如 docker）"
                   value={catPanel.slug}
                   onChange={(e) => setCatPanel({ ...catPanel, slug: e.target.value, err: "" })}
@@ -595,7 +601,12 @@ export default function App() {
                     }
                     const r = await api("/api/category/create", {
                       method: "POST",
-                      body: JSON.stringify({ slug, title: catPanel.title || slug, desc: catPanel.desc }),
+                      body: JSON.stringify({
+                        parent: (catPanel.parent || "").trim(),
+                        slug,
+                        title: catPanel.title || slug,
+                        desc: catPanel.desc,
+                      }),
                     })
                     if (!r.ok) {
                       setCatPanel({ ...catPanel, err: r.error || "创建失败" })
@@ -616,10 +627,12 @@ export default function App() {
               {catPanel.cats.length === 0 && <div className="picker-empty">还没有分类</div>}
               {catPanel.cats.map((c) => (
                 <div key={c} className="cat-row">
-                  <span className="picker-title">{c}</span>
-                  <span className="picker-path">docs/kb/{c}</span>
+                  <span className="picker-title" style={{ paddingLeft: (c.split("/").length - 1) * 16 }}>
+                    {c}
+                  </span>
+                  <span className="picker-path">docs/{c}</span>
                   <button
-                    className="cat-del"
+                    className="cat-del" title="删除这个分类"
                     onClick={async () => {
                       if (!window.confirm(`删除分类「${c}」及其下所有文章？`)) return
                       const r = await api("/api/category/delete", {
