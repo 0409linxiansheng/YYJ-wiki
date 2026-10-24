@@ -5,6 +5,7 @@ import {useThemeConfig} from '@docusaurus/theme-common';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {Divider, Flex, Layout, Space, Typography, theme} from 'antd';
 import SocialLinks from '@site/src/components/ui/SocialLinks';
+import siteJson from '@site/site.config.json';
 
 const {Text, Link: AntLink} = Typography;
 
@@ -79,9 +80,31 @@ export default function Footer() {
         </Flex>
 
         <Divider style={{margin: '32px 0 16px'}} />
-        <Text type="secondary" style={{fontSize: 13}}>
-          {copyright}
-        </Text>
+        <Flex wrap justify="space-between" align="center" gap={12}>
+          <Flex wrap align="center" gap={8}>
+            <Text type="secondary" style={{fontSize: 13}}>
+              {copyright}
+            </Text>
+            {(siteJson.footer?.legal ?? []).map((item) => (
+              <span key={item.label} style={{fontSize: 13}}>
+                <span style={{opacity: 0.4, margin: '0 6px'}}>·</span>
+                {item.href ? (
+                  <AntLink href={item.href}>{item.label}</AntLink>
+                ) : (
+                  <Link to={item.to}>{item.label}</Link>
+                )}
+              </span>
+            ))}
+          </Flex>
+          <AntLink
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({top: 0, behavior: 'smooth'});
+            }}
+            href="#">
+            回到顶部
+          </AntLink>
+        </Flex>
       </div>
     </Layout.Footer>
   );

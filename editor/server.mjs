@@ -242,7 +242,10 @@ const server = http.createServer(async (req, res) => {
   try {
     /* --- 静态 --- */
     if (req.method === 'GET' && !p.startsWith('/api/')) {
-      const file = path.join(PUBLIC_DIR, p === '/' ? 'index.html' : p);
+      let file = path.join(PUBLIC_DIR, p === '/' ? 'index.html' : p);
+      if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+        file = path.join(file, 'index.html');
+      }
       if (fs.existsSync(file) && fs.statSync(file).isFile()) {
         const ext = path.extname(file);
         const type = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8'}[ext] || 'application/octet-stream';
@@ -332,6 +335,23 @@ const server = http.createServer(async (req, res) => {
       const file = safePath(rel);
       if (!fs.existsSync(file)) return json(res, 404, {error: '文件不存在'});
       return json(res, 200, {path: rel, content: fs.readFileSync(file, 'utf8')});
+    }
+
+    /* --- 图片上传（编辑器拖拽/粘贴用） --- */
+    if (p === '/api/upload' && req.method === 'POST') {
+      const {name, dataUrl} = await readBody(req);
+      const m = /^data:([^;]+);base64,([\s\S]+)$/.exec(dataUrl || '');
+      if (!m) return json(res, 400, {error: '只接受 base64 图片'});
+      const buf = Buffer.from(m[2], 'base64');
+      if (buf.length > 12 * 1024 * 1024) return json(res, 400, {error: '图片太大（上限 12MB）'});
+      const rawExt = (name || 'img.png').split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const ext = rawExt || 'png';
+      const base = (name || 'img').replace(/\.[^.]+$/, '').replace(/[^\w\u4e00-\u9fa5-]+/g, '-').slice(0, 40) || 'img';
+      const fname = `${base}-${Date.now().toString(36)}.${ext}`;
+      const dir = path.join(SITE_DIR, 'static', 'img');
+      fs.mkdirSync(dir, {recursive: true});
+      fs.writeFileSync(path.join(dir, fname), buf);
+      return json(res, 200, {ok: true, url: `/img/${fname}`});
     }
 
     if (p === '/api/doc/save' && req.method === 'POST') {

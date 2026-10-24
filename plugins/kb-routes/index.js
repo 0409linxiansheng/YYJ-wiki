@@ -2,7 +2,7 @@ const siteJson = require('../../site.config.json');
 
 const CATEGORY_ORDER = Object.entries(siteJson.categories ?? {})
   .sort((a, b) => (a[1].position ?? 99) - (b[1].position ?? 99))
-  .map(([slug]) => slug);
+  .map(([slug]) => slug.replace(/^kb\//, ''));
 
 const CATEGORY_META = Object.fromEntries(
   Object.entries(siteJson.categories ?? {}).map(([slug, c]) => [
@@ -50,12 +50,15 @@ module.exports = function kbRoutesPlugin(context) {
 
       for (const doc of docs) {
         const dir = doc.sourceDirName ?? '';
-        const [top, sub] = dir.split('/');
-        if (!top) {
+        const parts = dir.split('/');
+        // 知识库只收 docs/kb/<分类>/ 下的文档；about、business、tools 不属于教程，跳过
+        if (parts[0] !== 'kb') {
           continue;
         }
+        const top = parts[1] ?? 'kb';
+        const sub = parts.length > 2 ? parts.slice(2).join('/') : null;
         if (!categories.has(top)) {
-          const meta = CATEGORY_META[top] ?? DEFAULT_META;
+          const meta = CATEGORY_META[`kb/${top}`] ?? CATEGORY_META[top] ?? DEFAULT_META;
           categories.set(top, {
             slug: top,
             label: meta.label ?? top,
@@ -105,6 +108,7 @@ module.exports = function kbRoutesPlugin(context) {
             })),
         })),
         recent: docs
+          .filter((d) => (d.sourceDirName ?? '').startsWith('kb/'))
           .filter((d) => d.lastUpdatedAt)
           .sort((a, b) => (a.lastUpdatedAt < b.lastUpdatedAt ? 1 : -1))
           .slice(0, 6)

@@ -113,11 +113,11 @@ export default function Home() {
           </div>
 
           <Flex justify="center" gap={12} wrap>
-            <Button type="primary" size="large" href={kbUrl}>
-              进入知识库 <ArrowRightOutlined />
+            <Button type="primary" size="large" href={blogUrl}>
+              技术手记 <ArrowRightOutlined />
             </Button>
-            <Button size="large" href={blogUrl}>
-              阅读博客
+            <Button size="large" href={kbUrl}>
+              知识库
             </Button>
           </Flex>
         </div>

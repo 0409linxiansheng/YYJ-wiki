@@ -768,3 +768,177 @@ html {
 html body {
   width: 100% !important;
 }
+
+/* ---------- MDX 内容组件：卡片 / 步骤条 ---------- */
+.yyj-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+.yyj-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.yyj-card-image {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.yyj-card-body {
+  min-width: 0;
+}
+
+.yyj-card-title {
+  display: block;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--fg);
+  border-bottom: none;
+  margin-bottom: 4px;
+}
+
+a.yyj-card-title {
+  color: var(--brand-700);
+}
+
+a.yyj-card-title:hover {
+  text-decoration: underline;
+  border-bottom: none;
+}
+
+.yyj-card-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted-fg);
+}
+
+/* 步骤条：把内部有序列表画成竖直流程 */
+.yyj-steps {
+  margin: 18px 0;
+}
+
+.yyj-steps > ol {
+  list-style: none;
+  counter-reset: yyj-step;
+  margin: 0;
+  padding: 0 0 0 4px;
+}
+
+.yyj-steps > ol > li {
+  counter-increment: yyj-step;
+  position: relative;
+  padding: 0 0 18px 40px;
+  margin: 0;
+}
+
+.yyj-steps > ol > li::before {
+  content: counter(yyj-step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--brand-500) 25%, transparent);
+}
+
+.yyj-steps > ol > li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 30px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--line);
+}
+
+[data-theme='dark'] .yyj-steps > ol > li::before {
+  background: color-mix(in srgb, #3b82f6 22%, transparent);
+  color: #bfdbfe;
+}
+
+/* ---------- 悬停预览 ---------- */
+.yyj-preview {
+  position: absolute;
+  z-index: 9999;
+  display: none;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  pointer-events: auto;
+  max-width: min(560px, calc(100vw - 32px));
+}
+.yyj-preview.on { display: block; }
+.yyj-preview-title { font-weight: 600; font-size: 15px; color: var(--fg); margin-bottom: 6px; }
+.yyj-preview-body {
+  max-height: min(58vh, 440px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fg);
+  padding-right: 6px;
+  scrollbar-width: thin;
+}
+.yyj-preview-body::-webkit-scrollbar { width: 8px; }
+.yyj-preview-body::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 4px; }
+.yyj-preview-body h1 { font-size: 16px; margin: 0 0 8px; }
+.yyj-preview-body h2 { font-size: 14px; margin: 12px 0 6px; border-bottom: none; padding-bottom: 0; }
+.yyj-preview-body h3 { font-size: 13px; margin: 10px 0 4px; }
+.yyj-preview-body p { margin: 0 0 8px; }
+.yyj-preview-body ul, .yyj-preview-body ol { margin: 0 0 8px; padding-left: 18px; }
+.yyj-preview-body img { max-width: 100%; border-radius: 6px; }
+.yyj-preview-body pre { font-size: 12px; max-height: 120px; overflow: hidden; }
+.yyj-preview-body table { font-size: 12px; }
+.yyj-preview-loading { font-size: 13px; color: var(--muted-fg); }
+
+/* ---------- 反向链接 ---------- */
+.yyj-backlinks { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
+.yyj-backlinks-head { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted-fg); margin-bottom: 10px; }
+.yyj-backlinks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.yyj-backlinks li { margin: 0; }
+.yyj-backlinks a { font-size: 14px; color: var(--brand-700); border-bottom: 1px solid color-mix(in srgb, var(--brand-700) 30%, transparent); }
+.yyj-backlinks a:hover { border-bottom-color: var(--brand-700); }
+
+/* 手机端：预览改成底部抽屉 */
+.yyj-preview.sheet {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  top: auto !important;
+  width: auto !important;
+  max-height: 62vh;
+  z-index: 10000;
+}
+.yyj-preview-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.28);
+}
+@media (max-width: 800px) {
+  .yyj-preview-body { max-height: 52vh; }
+}

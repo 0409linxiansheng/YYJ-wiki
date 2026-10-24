@@ -4,6 +4,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import math from 'remark-math';
 import katex from 'rehype-katex';
 import footnotes from 'remark-footnotes';
+import wikilinks from './plugins/remark-wikilinks.js';
 import {readFileSync} from 'node:fs';
 
 // ============================================================
@@ -59,9 +60,18 @@ const config = {
   plugins: [
     [
       '@docusaurus/plugin-client-redirects',
-      {redirects: []},
+      {
+        redirects: [
+          {from: '/industry', to: '/kb/industry'},
+          {from: '/industry/:path*', to: '/kb/industry'},
+          {from: '/business', to: '/blog'},
+          {from: '/business/:path*', to: '/blog'},
+          {from: '/kb/index', to: '/kb'},
+        ],
+      },
     ],
     './plugins/kb-routes',
+    require.resolve('./plugins/yyj-backlinks'),
     function fontLinksPlugin(context) {
       return {
         name: 'font-links',
@@ -111,7 +121,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          remarkPlugins: [math, footnotes],
+          remarkPlugins: [math, footnotes, [wikilinks, {base: `/${GITHUB_REPO}/`}]],
           rehypePlugins: [katex],
           routeBasePath: '/',
           showLastUpdateTime: true,
@@ -119,10 +129,10 @@ const config = {
           editUrl: `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/tree/main/`,
         },
         blog: {
-          blogTitle: '博客',
-          blogDescription: '记录业务思考与行业观察',
+          blogTitle: '技术手记',
+          blogDescription: '记录正在做的项目和踩过的坑',
           showReadingTime: true,
-          remarkPlugins: [math, footnotes],
+          remarkPlugins: [math, footnotes, [wikilinks, {base: `/${GITHUB_REPO}/`}]],
           rehypePlugins: [katex],
           feedOptions: {
             type: ['rss', 'atom'],

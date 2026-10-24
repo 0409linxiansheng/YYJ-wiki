@@ -1,47 +1,115 @@
 {
   "title": "云屿集",
-  "tagline": "业务分享与行业知识",
+  "tagline": "记录正在做的项目和踩过的坑，整理成能照着做的教程。",
   "favicon": "/img/favicon.svg",
   "logo": "/img/logo.svg",
-  "theme": { "primary": "#3b5bdb" },
+  "theme": {
+    "primary": "#3b5bdb"
+  },
   "navbar": [
-    { "label": "知识库", "to": "/kb", "position": "left" },
-    { "label": "博客", "to": "/blog", "position": "left" },
-    { "label": "关于我们", "to": "/about", "position": "left" }
+    {
+      "label": "知识库",
+      "to": "/kb",
+      "position": "left"
+    },
+    {
+      "label": "技术手记",
+      "to": "/blog",
+      "position": "left"
+    },
+    {
+      "label": "资源与工具",
+      "to": "/tools",
+      "position": "left"
+    },
+    {
+      "label": "关于我们",
+      "to": "/about",
+      "position": "left"
+    }
   ],
   "footer": {
     "columns": [
       {
         "title": "内容导航",
         "items": [
-          { "label": "首页", "to": "/" },
-          { "label": "知识库", "to": "/kb" },
-          { "label": "博客", "to": "/blog" }
+          {
+            "label": "首页",
+            "to": "/"
+          },
+          {
+            "label": "技术手记",
+            "to": "/blog"
+          },
+          {
+            "label": "知识库",
+            "to": "/kb"
+          }
         ]
       },
       {
         "title": "相关资源",
         "items": [
-          { "label": "GitHub 仓库", "href": "https://github.com/YYJ-lin/YYJ-wiki" },
-          { "label": "写作指南", "to": "/about/writing-guide" },
-          { "label": "组件演示", "to": "/about/components" }
+          {
+            "label": "资源与工具",
+            "to": "/tools"
+          },
+          {
+            "label": "GitHub 仓库",
+            "href": "https://github.com/YYJ-lin/YYJ-wiki"
+          }
         ]
       },
       {
         "title": "关于与反馈",
         "items": [
-          { "label": "关于本站", "to": "/about" },
-          { "label": "反馈与联系", "href": "https://github.com/YYJ-lin/YYJ-wiki/issues" }
+          {
+            "label": "关于我们",
+            "to": "/about"
+          },
+          {
+            "label": "反馈与联系",
+            "href": "https://github.com/YYJ-lin/YYJ-wiki/issues"
+          }
         ]
+      }
+    ],
+    "legal": [
+      {
+        "label": "隐私说明",
+        "to": "/about/privacy"
+      },
+      {
+        "label": "版权与许可",
+        "to": "/about/license"
+      },
+      {
+        "label": "RSS",
+        "href": "/blog/rss.xml"
       }
     ]
   },
   "home": {
-    "overline": "YUNYU JI · 业务与行业",
+    "overline": "YUNYU JI · 项目记录与技术教程",
     "cards": [
-      { "icon": "project", "title": "业务分享", "desc": "项目复盘、方法论，以及真实场景里的取舍。", "to": "/business" },
-      { "icon": "global", "title": "行业知识", "desc": "术语、政策、案例，以及行业里的常识。", "to": "/industry" },
-      { "icon": "tool", "title": "工具资源", "desc": "常用工具、模板与配置，拿去就能用。", "to": "/tools" }
+      {
+        "icon": "project",
+        "title": "技术手记",
+        "desc": "正在做的项目与案例复盘，按时间倒序。",
+        "to": "/blog"
+      },
+      {
+        "icon": "global",
+        "title": "知识库",
+        "desc": "教程与文档：ERPNext、WordPress、应用使用。",
+        "to": "/kb"
+      },
+      {
+        "icon": "tool",
+        "title": "资源与工具",
+        "desc": "推荐的工具、模板与资料，都是自己在用的。",
+        "to": "/tools"
+      }
     ]
   },
   "social": {
@@ -50,10 +118,32 @@
     "qqQr": "/img/qq-qr.webp"
   },
   "categories": {
-    "business": { "label": "业务分享", "desc": "项目复盘、方法论与真实场景里的取舍", "icon": "project", "position": 1 },
-    "industry": { "label": "行业知识", "desc": "术语、政策、案例与行业常识的整理", "icon": "global", "position": 2 },
-    "tools": { "label": "工具资源", "desc": "常用工具、模板与配置集合", "icon": "tool", "position": 3 },
-    "about": { "label": "关于本站", "desc": "站点说明、写作指南与组件演示", "icon": "info", "position": 4 }
+    "kb/erpnext": {
+      "label": "ERPNext",
+      "desc": "安装、配置、二次开发与升级",
+      "icon": "project",
+      "position": 1
+    },
+    "kb/wordpress": {
+      "label": "WordPress",
+      "desc": "建站、主题改造、插件与性能",
+      "icon": "global",
+      "position": 2
+    },
+    "kb/apps": {
+      "label": "应用介绍",
+      "desc": "各类应用怎么用、有哪些坑",
+      "icon": "tool",
+      "position": 3
+    },
+    "kb/industry": {
+      "label": "行业常识",
+      "desc": "术语、政策与案例",
+      "icon": "info",
+      "position": 4
+    }
   },
-  "seo": { "description": "云屿集 · 业务分享与行业知识" }
+  "seo": {
+    "description": "云屿集 · 业务分享与行业知识"
+  }
 }
