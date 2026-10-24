@@ -321,6 +321,23 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {ok: true});
     }
 
+    if (p === '/api/password' && req.method === 'POST') {
+      const {oldPassword, newPassword} = await readBody(req);
+      const settings = loadSettings();
+      if (!settings) return json(res, 400, {error: '还没初始化'});
+      if (hashPassword(oldPassword || '', settings.salt) !== settings.passwordHash) {
+        return json(res, 400, {error: '旧密码不对'});
+      }
+      if (!newPassword || String(newPassword).length < 6) {
+        return json(res, 400, {error: '新密码至少 6 位'});
+      }
+      const salt = crypto.randomBytes(16).toString('hex');
+      settings.salt = salt;
+      settings.passwordHash = hashPassword(String(newPassword), salt);
+      writeJson(SETTINGS_FILE, settings);
+      return json(res, 200, {ok: true});
+    }
+
     if (p === '/api/logout' && req.method === 'POST') {
       res.setHeader('Set-Cookie', 'yyj_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0');
       return json(res, 200, {ok: true});

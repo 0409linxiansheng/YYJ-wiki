@@ -472,6 +472,20 @@ export default function App() {
               <button onClick={publish}>发布</button>
               <button
                 onClick={async () => {
+                  const oldPassword = window.prompt("当前密码")
+                  if (!oldPassword) return
+                  const newPassword = window.prompt("新密码（至少 6 位）")
+                  if (!newPassword) return
+                  const r = await api("/api/password", {
+                    method: "POST",
+                    body: JSON.stringify({ oldPassword, newPassword }),
+                  })
+                  flash(r.ok ? "密码已修改" : r.error || "修改失败")
+                }}>
+                改密码
+              </button>
+              <button
+                onClick={async () => {
                   if (!window.confirm(`删除《${title || current.path}》？不可恢复（git 里还能找回）`)) return
                   const r = await api("/api/doc/delete", {
                     method: "POST",
