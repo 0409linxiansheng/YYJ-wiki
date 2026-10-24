@@ -381,7 +381,11 @@ const server = http.createServer(async (req, res) => {
 
     if (p === '/api/doc/create' && req.method === 'POST') {
       const {kind, category, title, slug, draft} = await readBody(req);
-      const s = slug || slugify(title || 'untitled');
+      let s = slug || slugify(title || 'untitled');
+      // 文件名必须是 ASCII（中文标题自动降级成日期+编号，避免网址变百分号编码）
+      if (!/^[a-z0-9-]+$/.test(s)) {
+        s = 'post-' + new Date().toISOString().slice(0, 10) + '-' + Math.random().toString(36).slice(2, 6);
+      }
       let rel;
       if (draft) {
         rel = `drafts/${s}.mdx`;
