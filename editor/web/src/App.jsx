@@ -100,6 +100,7 @@ export default function App() {
   const [dirty, setDirty] = useState(false)
   const [toast, setToast] = useState("")
   const [picker, setPicker] = useState(null) // { query }
+  const [catPanel, setCatPanel] = useState(null) // { cats, slug, title, desc, err }
   const fmRef = useRef("")
 
   const schema = BlockNoteSchema.create({
@@ -442,33 +443,10 @@ export default function App() {
           <button onClick={() => createDoc("blog")}>+ 技术手记</button>
           <button
             onClick={async () => {
-              const slug = window.prompt("新分类的英文标识（小写字母/数字/连字符，会成为网址）")
-              if (!slug) return
-              const name = window.prompt("分类显示名称（如：Docker）") || slug
-              const desc = window.prompt("一句话说明（可空）") || ""
-              const r = await api("/api/category/create", {
-                method: "POST",
-                body: JSON.stringify({ slug, title: name, desc }),
-              })
-              flash(r.ok ? `分类「${name}」已创建（docs/kb/${slug}）` : r.error || "创建失败")
-              if (r.ok) loadState()
+              const r = await api("/api/categories")
+              setCatPanel({ cats: r.categories ?? [], slug: "", title: "", desc: "", err: "" })
             }}>
-            + 新建分类
-          </button>
-          <button
-            onClick={async () => {
-              const cats = tree.filter((g) => g.title.startsWith("kb")).map((g) => g.title)
-              const slug = window.prompt("要删除哪个分类？输入英文标识（docs/kb 下的目录名）")
-              if (!slug) return
-              if (!window.confirm(`删除分类「${slug}」及其下所有文章？`)) return
-              const r = await api("/api/category/delete", {
-                method: "POST",
-                body: JSON.stringify({ slug }),
-              })
-              flash(r.ok ? "分类已删除" : r.error || "删除失败")
-              if (r.ok) loadState()
-            }}>
-            − 删除分类
+            分类管理
           </button>
         </div>
       </aside>
@@ -577,6 +555,87 @@ export default function App() {
               {(state.docs ?? []).length + (state.blog ?? []).length === 0 && (
                 <div className="picker-empty">还没有文章</div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {catPanel && (
+        <div className="picker-mask" onClick={() => setCatPanel(null)}>
+          <div className="picker" onClick={(e) => e.stopPropagation()}>
+            <div className="picker-head">
+              <span>分类管理 · 知识库</span>
+              <button onClick={() => setCatPanel(null)}>×</button>
+            </div>
+
+            <div style={{ padding: '10px 14px', borderBottom: '1px solid #e4e4e7' }}>
+              <div className="cat-form">
+                <input
+                  placeholder="英文标识（如 docker）"
+                  value={catPanel.slug}
+                  onChange={(e) => setCatPanel({ ...catPanel, slug: e.target.value, err: "" })}
+                />
+                <input
+                  placeholder="显示名称（如 Docker 教程）"
+                  value={catPanel.title}
+                  onChange={(e) => setCatPanel({ ...catPanel, title: e.target.value })}
+                />
+                <input
+                  placeholder="一句话说明（可空）"
+                  value={catPanel.desc}
+                  onChange={(e) => setCatPanel({ ...catPanel, desc: e.target.value })}
+                />
+                <button
+                  className="cat-create"
+                  onClick={async () => {
+                    const slug = catPanel.slug.trim().toLowerCase()
+                    if (!/^[a-z0-9-]+$/.test(slug)) {
+                      setCatPanel({ ...catPanel, err: "英文标识只能用 a-z、0-9、连字符" })
+                      return
+                    }
+                    const r = await api("/api/category/create", {
+                      method: "POST",
+                      body: JSON.stringify({ slug, title: catPanel.title || slug, desc: catPanel.desc }),
+                    })
+                    if (!r.ok) {
+                      setCatPanel({ ...catPanel, err: r.error || "创建失败" })
+                      return
+                    }
+                    const list = await api("/api/categories")
+                    setCatPanel({ cats: list.categories ?? [], slug: "", title: "", desc: "", err: "" })
+                    loadState()
+                    flash(`分类 ${slug} 已创建`)
+                  }}>
+                  新建
+                </button>
+              </div>
+              {catPanel.err && <div className="cat-err">{catPanel.err}</div>}
+            </div>
+
+            <div className="picker-list">
+              {catPanel.cats.length === 0 && <div className="picker-empty">还没有分类</div>}
+              {catPanel.cats.map((c) => (
+                <div key={c} className="cat-row">
+                  <span className="picker-title">{c}</span>
+                  <span className="picker-path">docs/kb/{c}</span>
+                  <button
+                    className="cat-del"
+                    onClick={async () => {
+                      if (!window.confirm(`删除分类「${c}」及其下所有文章？`)) return
+                      const r = await api("/api/category/delete", {
+                        method: "POST",
+                        body: JSON.stringify({ slug: c }),
+                      })
+                      if (!r.ok) return flash(r.error || "删除失败")
+                      const list = await api("/api/categories")
+                      setCatPanel({ ...catPanel, cats: list.categories ?? [] })
+                      loadState()
+                      flash("已删除")
+                    }}>
+                    删除
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
