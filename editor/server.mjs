@@ -404,7 +404,7 @@ const server = http.createServer(async (req, res) => {
         fs.writeFileSync(file, body);
       } else {
         rel = `docs/${category}/${s}.mdx`;
-        const body = `---\ntitle: ${title || s}\ndescription: \nsidebar_position: 1\n---\n\n在此开始写作。\n`;
+        const body = `---\ntitle: ${title || s}\nsidebar_position: 1\n---\n\n在此开始写作。\n`;
         const file = safePath(rel);
         fs.mkdirSync(path.dirname(file), {recursive: true});
         fs.writeFileSync(file, body);
@@ -448,7 +448,7 @@ const server = http.createServer(async (req, res) => {
       const name = title || clean;
       fs.writeFileSync(
         path.join(dir, 'index.mdx'),
-        `---\ntitle: ${name}\nsidebar_position: 20\n---\n\n${desc || '这个分类会放什么内容。'}\n`,
+        `---\ntitle: ${name}\n${desc ? `description: ${desc}\n` : ''}sidebar_position: 20\n---\n\n${desc || '这个分类会放什么内容。'}\n`,
       );
 
       // 一级分类自动进顶部导航
