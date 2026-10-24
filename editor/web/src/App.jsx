@@ -651,7 +651,7 @@ export default function App() {
                       if (!window.confirm(`删除分类「${c}」及其下所有文章？`)) return
                       const r = await api("/api/category/delete", {
                         method: "POST",
-                        body: JSON.stringify({ slug: c }),
+                        body: JSON.stringify({ path: c }),
                       })
                       if (!r.ok) return flash(r.error || "删除失败")
                       const list = await api("/api/categories")

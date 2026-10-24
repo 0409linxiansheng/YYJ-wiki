@@ -469,7 +469,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (p === '/api/category/delete' && req.method === 'POST') {
-      const {path: rel} = await readBody(req);
+      const body = await readBody(req);
+      const rel = body.path ?? body.slug ?? '';
       const clean = String(rel || '').trim().replace(/^\.?\/+|\/+$/g, '');
       if (!clean) return json(res, 400, {error: '缺少分类路径'});
       const dir = path.join(SITE_DIR, 'docs', clean);
