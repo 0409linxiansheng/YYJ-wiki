@@ -12,11 +12,24 @@ import net from 'node:net';
 import {fileURLToPath} from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SITE_DIR = path.resolve(__dirname, '..');
+// 站点根目录：优先读 workbench.config.json，其次环境变量，最后默认上一级
+const CONFIG_FILE = path.join(__dirname, 'workbench.config.json');
+function loadWorkbenchConfig() {
+  try {
+    return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+  } catch {
+    return {};
+  }
+}
+const WB_CONFIG = loadWorkbenchConfig();
+const SITE_DIR = path.resolve(
+  __dirname,
+  WB_CONFIG.siteDir || process.env.SITE_DIR || '..',
+);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 const SITE_CONFIG = path.join(SITE_DIR, 'site.config.json');
-const PORT = Number(process.env.EDITOR_PORT || 3002);
+const PORT = Number(WB_CONFIG.port || process.env.EDITOR_PORT || 3002);
 const SESSION_TTL = 7 * 24 * 3600 * 1000;
 
 /* ---------------- 配置与会话 ---------------- */
