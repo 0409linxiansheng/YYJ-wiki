@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useCreateBlockNote } from "@blocknote/react"
+import { useCreateBlockNote, SuggestionMenuController, getDefaultReactSlashMenuItems } from "@blocknote/react"
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core"
 import { Callout } from "./blocks/Callout.jsx"
 import { Details, Video } from "./blocks/DetailsAndVideo.jsx"
@@ -44,6 +44,20 @@ function setFmField(fm, key, value) {
 }
 
 /* ---------- 组件面板 ---------- */
+const CUSTOM_SLASH = [
+  { label: "提示框", icon: "💡", type: "callout", props: { kind: "tip", title: "", body: "" } },
+  { label: "折叠块", icon: "▸", type: "details", props: { title: "", body: "" } },
+  { label: "卡片", icon: "▤", type: "card", props: { title: "", desc: "", image: "", href: "" } },
+  { label: "步骤条", icon: "①", type: "steps", props: { body: "" } },
+  {
+    label: "标签页",
+    icon: "▭",
+    type: "tabs",
+    props: { data: JSON.stringify([{ label: "标签一", body: "" }, { label: "标签二", body: "" }]) },
+  },
+  { label: "视频", icon: "▶", type: "video", props: { url: "" } },
+]
+
 const BLOCK_BUTTONS = [
   { label: "正文", icon: "¶", type: "paragraph" },
   { label: "二级标题", icon: "H2", type: "heading", props: { level: 2 } },
@@ -426,6 +440,36 @@ export default function App() {
             + 知识库文章
           </button>
           <button onClick={() => createDoc("blog")}>+ 技术手记</button>
+          <button
+            onClick={async () => {
+              const slug = window.prompt("新分类的英文标识（小写字母/数字/连字符，会成为网址）")
+              if (!slug) return
+              const name = window.prompt("分类显示名称（如：Docker）") || slug
+              const desc = window.prompt("一句话说明（可空）") || ""
+              const r = await api("/api/category/create", {
+                method: "POST",
+                body: JSON.stringify({ slug, title: name, desc }),
+              })
+              flash(r.ok ? `分类「${name}」已创建（docs/kb/${slug}）` : r.error || "创建失败")
+              if (r.ok) loadState()
+            }}>
+            + 新建分类
+          </button>
+          <button
+            onClick={async () => {
+              const cats = tree.filter((g) => g.title.startsWith("kb")).map((g) => g.title)
+              const slug = window.prompt("要删除哪个分类？输入英文标识（docs/kb 下的目录名）")
+              if (!slug) return
+              if (!window.confirm(`删除分类「${slug}」及其下所有文章？`)) return
+              const r = await api("/api/category/delete", {
+                method: "POST",
+                body: JSON.stringify({ slug }),
+              })
+              flash(r.ok ? "分类已删除" : r.error || "删除失败")
+              if (r.ok) loadState()
+            }}>
+            − 删除分类
+          </button>
         </div>
       </aside>
 
@@ -447,9 +491,45 @@ export default function App() {
               <span className="path">{current.path}</span>
               <button onClick={save} className={dirty ? "primary" : ""}>保存</button>
               <button onClick={publish}>发布</button>
+              <button
+                onClick={async () => {
+                  if (!window.confirm(`删除《${title || current.path}》？不可恢复（git 里还能找回）`)) return
+                  const r = await api("/api/doc/delete", {
+                    method: "POST",
+                    body: JSON.stringify({ path: current.path }),
+                  })
+                  if (r.ok) {
+                    setCurrent(null)
+                    setTitle("")
+                    flash("已删除")
+                    loadState()
+                  } else flash("删除失败")
+                }}>
+                删除
+              </button>
             </div>
             <div className="editor-body" onChange={() => setDirty(true)}>
-              <BlockNoteView editor={editor} theme="light" onChange={() => setDirty(true)} />
+              <BlockNoteView editor={editor} theme="light" onChange={() => setDirty(true)}>
+                <SuggestionMenuController
+                  triggerCharacter="/"
+                  getItems={async (query) => {
+                    const defaults = getDefaultReactSlashMenuItems(editor)
+                    const custom = CUSTOM_SLASH.map((c) => ({
+                      title: c.label,
+                      subtext: "云屿集组件",
+                      group: "云屿集组件",
+                      icon: <span>{c.icon}</span>,
+                      onItemClick: () => {
+                        const cursor = editor.getTextCursorPosition()
+                        editor.insertBlocks([{ type: c.type, props: c.props }], cursor.block, "after")
+                      },
+                    }))
+                    const all = [...defaults, ...custom]
+                    const q = query.trim()
+                    return q ? all.filter((i) => i.title.includes(q)) : all
+                  }}
+                />
+              </BlockNoteView>
             </div>
           </>
         )}

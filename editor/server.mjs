@@ -391,6 +391,37 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {ok: true, path: rel});
     }
 
+    /* --- 分类（docs/kb 下的子目录） --- */
+    if (p === '/api/category/create' && req.method === 'POST') {
+      const {slug, title, desc} = await readBody(req);
+      const clean = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      if (!clean) return json(res, 400, {error: '分类标识只能用小写字母、数字、连字符'});
+      const dir = path.join(SITE_DIR, 'docs', 'kb', clean);
+      if (fs.existsSync(dir)) return json(res, 400, {error: '这个分类已经存在'});
+      fs.mkdirSync(dir, {recursive: true});
+      const body = `---\ntitle: ${title || clean}\ndescription: ${desc || ''}\nsidebar_position: 9\n---\n\n这一类会写什么，一句话说明。\n`;
+      fs.writeFileSync(path.join(dir, 'index.mdx'), body);
+      return json(res, 200, {ok: true, path: `docs/kb/${clean}/index.mdx`});
+    }
+
+    if (p === '/api/category/delete' && req.method === 'POST') {
+      const {slug} = await readBody(req);
+      const clean = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      if (!clean) return json(res, 400, {error: '缺少分类标识'});
+      const dir = path.join(SITE_DIR, 'docs', 'kb', clean);
+      if (!fs.existsSync(dir)) return json(res, 404, {error: '分类不存在'});
+      fs.rmSync(dir, {recursive: true, force: true});
+      return json(res, 200, {ok: true});
+    }
+
+    if (p === '/api/categories' && req.method === 'GET') {
+      const kbDir = path.join(SITE_DIR, 'docs', 'kb');
+      const list = fs.existsSync(kbDir)
+        ? fs.readdirSync(kbDir).filter((n) => fs.statSync(path.join(kbDir, n)).isDirectory())
+        : [];
+      return json(res, 200, {categories: list});
+    }
+
     if (p === '/api/doc/delete' && req.method === 'POST') {
       const {path: rel} = await readBody(req);
       const file = safePath(rel);
